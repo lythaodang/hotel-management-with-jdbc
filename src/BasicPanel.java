@@ -50,7 +50,6 @@ public class BasicPanel extends JPanel {
 		this.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
-		c.insets = new Insets(10, 10, 10, 10);
 		c.weightx = 1;
 	}
 	

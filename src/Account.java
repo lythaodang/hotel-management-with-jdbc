@@ -20,18 +20,6 @@ public class Account {
 	private String role;
 	private ArrayList<Reservation> reservations;
 
-	/**
-	 * Create an account
-	 * @param firstName - user's first name
-	 * @param lastName - user's last name
-	 * @param username - user's login
-	 * @param password - user's password
-	 * @param age - user's age
-	 * @param gender - user's gender
-	 * @param role - user's role
-	 * @param secQuestion - user's security question
-	 * @param secAnswer - user's security answer 
-	 */
 	public Account(String firstName, String lastName, String username, String role) {
 		this.username = username;
 		this.firstName = firstName;
