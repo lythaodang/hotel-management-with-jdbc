@@ -586,7 +586,7 @@ public class View {
 				if (room != null) {
 					if (model.addReservation(room.getRoomId(), checkIn.getText(), checkOut.getText())) {
 						int response = JOptionPane.showConfirmDialog(
-								new JFrame(), "Your reservation has been saved.<br>"
+								new JFrame(), "<html>Your reservation has been saved.<br>"
 										+ "Would you like to make more transactions?</html>",
 										"Confirmation", JOptionPane.YES_NO_OPTION,
 										JOptionPane.QUESTION_MESSAGE);
@@ -650,7 +650,7 @@ public class View {
 				if (!model.getReservations().isEmpty()) {
 					Account user = model.getCurrentUser();
 					String text = "Username: " + user.getUsername() + "\nName: " + user.getFirstName() 
-					+ " " + user.getLastName() + "\n";
+					+ " " + user.getLastName() + "\nReservations made: " + model.getReservations().size();
 					
 					double cost = 0;
 					int i = 1;
@@ -680,30 +680,6 @@ public class View {
 		});
 		panel.addComponent(backBtn, 0, 3);
 		return panel;
-	}
-	
-	private GregorianCalendar isValidDateFormat(String input) {
-		try {
-			dateFormatter.setLenient(false);
-			GregorianCalendar cal = new GregorianCalendar();
-			Date d = dateFormatter.parse(input);
-			cal.setTime(d);
-
-			return cal;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private int checkDaysBetween(GregorianCalendar checkIn, GregorianCalendar checkOut) {
-		GregorianCalendar temp = (GregorianCalendar) checkIn.clone();
-		int count = 0;
-		while (!temp.equals(checkOut)) {
-			temp.add(Calendar.DATE, 1);
-			count++;
-		}
-		return count;
 	}
 	
 	//Kun added
@@ -846,5 +822,29 @@ public class View {
 		panel.addNavigationButton("Back", 16, "Manager", 0, 5);
 
 		return panel;
+	}
+	
+	private GregorianCalendar isValidDateFormat(String input) {
+		try {
+			dateFormatter.setLenient(false);
+			GregorianCalendar cal = new GregorianCalendar();
+			Date d = dateFormatter.parse(input);
+			cal.setTime(d);
+
+			return cal;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private int checkDaysBetween(GregorianCalendar checkIn, GregorianCalendar checkOut) {
+		GregorianCalendar temp = (GregorianCalendar) checkIn.clone();
+		int count = 0;
+		while (!temp.equals(checkOut)) {
+			temp.add(Calendar.DATE, 1);
+			count++;
+		}
+		return count;
 	}
 }

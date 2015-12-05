@@ -125,7 +125,7 @@ public class Model {
 				+ "where customer ='" + username + "'";
 		try {
 			ResultSet rs = statement.executeQuery(queryRes);
-			if (rs.next()) {
+			while (rs.next()) {
 				Room r = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
 				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), r, 
 						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
@@ -134,9 +134,6 @@ public class Model {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-
-
 	}
 
 	public boolean checkUserExistence(String username) {
