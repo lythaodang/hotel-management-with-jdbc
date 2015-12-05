@@ -66,6 +66,10 @@ public class View {
 		cards.add(getWelcomePanel("Receptionist"), "Receptionist");
 		cards.add(getMakeReservationPanel(), "Book");
 
+		//Kun added
+		cards.add(getGiveFeedbackPanel(), "Give Feedback");
+		
+		
 		frame.add(cards); // add the panel with card layout to the frame
 
 		// below are the frame's characteristics
@@ -523,8 +527,11 @@ public class View {
 		list.setVisibleRowCount(-1);
 		JScrollPane listScroller = new JScrollPane(list);
 		panel.addComponent(listScroller, 0, 4);
-
+		
 		c.weighty = 0;
+		c.gridwidth = 0;
+		panel.addNavigationButton("Back", 16, "Customer", 0, 3);
+		
 		JButton searchBtn = new JButton("Search for rooms");
 		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		searchBtn.addActionListener(new ActionListener() {
@@ -646,5 +653,26 @@ public class View {
 			count++;
 		}
 		return count;
+	}
+	
+	private JPanel getGiveFeedbackPanel() {
+	
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+	
+		c.weighty = 1;
+		c.gridwidth = 1;
+
+		panel.addLabel("complaint", 16, "left", null, null, 0, 1);
+
+		final JTextField complaint = new JTextField();
+		panel.addComponent(complaint, 0, 2);
+
+		c.weighty = 0;
+		c.gridwidth = 0;
+		panel.addNavigationButton("Back", 16, "Customer", 0, 3);
+		
+		
+		return panel;
 	}
 }
