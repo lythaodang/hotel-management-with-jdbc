@@ -23,7 +23,6 @@ import javax.swing.event.ChangeListener;
  */
 public class Model {
 	public static final GregorianCalendar TODAY = new GregorianCalendar();
-	private static final double TAX = .0875;
 
 	private ArrayList<ChangeListener> listeners;
 
@@ -80,12 +79,12 @@ public class Model {
 	public boolean addReservation(int roomId, String checkIn, String checkOut) {
 		String query = String.format("insert into reservation(roomId, customer, startDate, endDate) values ('%s','%s',%s,%s)",
 				roomId, currentUser.getUsername(), toDateSQL(checkIn), toDateSQL(checkOut));
-		System.out.println(query);
 		try {
 			statement.execute(query);
 			setCurrentUser(currentUser.getUsername());
 			ArrayList<Reservation> res = currentUser.getReservations();
 			reservations.add(res.get(res.size() - 1));
+			update();
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -100,12 +99,12 @@ public class Model {
 			return;
 		}
 		
-		String query = "SELECT username, firstname, lastname, userrole FROM USER WHERE username = '" + username + "'";
+		String queryUser = "SELECT username, firstname, lastname, userrole FROM USER WHERE username = '" + username + "'";
 
 		try {
 			String role;
 
-			ResultSet rs = statement.executeQuery(query);
+			ResultSet rs = statement.executeQuery(queryUser);
 			if (rs.next()) {
 				setCurrentRole(role = rs.getString("userrole"));
 				currentUser = new Account(rs.getString("firstname"), rs.getString("lastname"), rs.getString("username"), role);
@@ -115,16 +114,23 @@ public class Model {
 			e.printStackTrace();
 		}
 		
-		query = "select reservationId, roomId, startDate, endDate, numOfDays, totalCost from reservation where customer = '" + username + "'";
+		String queryRes = "select reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+				+ "from room left outer join reservation on room.roomid = reservation.roomid "
+				+ "where customer ='" + username + "'";
 		try {
-			ResultSet rs = statement.executeQuery(query);
+			ResultSet rs = statement.executeQuery(queryRes);
 			if (rs.next()) {
-				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), rs.getInt("roomid"), rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
+				Room r = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
+				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), r, 
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
 				update();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
+
+		
 	}
 	
 	public boolean checkUserExistence(String username) {
@@ -234,6 +240,10 @@ public class Model {
 		return reservations;
 	}
 
+	public void clearResrvations() {
+		reservations = new ArrayList<Reservation>();
+	}
+	
 	/**
 	 * Adds the changelisteners
 	 * @param accounts the accounts to set

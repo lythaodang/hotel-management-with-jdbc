@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -13,15 +14,15 @@ import java.util.Date;
  */
 public class Reservation {
 	private int reservationId;
-	private int roomId;
+	private Room room;
 	private Date startDate;
 	private Date endDate;
 	private int numOfDays;
 	private double totalCost;	
 
-	public Reservation(int reservationId, int roomId, Date startDate, Date endDate, int numOfDays, double totalCost) {
+	public Reservation(int reservationId, Room room, Date startDate, Date endDate, int numOfDays, double totalCost) {
 		this.reservationId = reservationId;
-		this.roomId = roomId;
+		this.room = room;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.numOfDays = numOfDays;
@@ -32,8 +33,8 @@ public class Reservation {
 		return reservationId;
 	}
 
-	public int getRoomId() {
-		return roomId;
+	public Room getRoom() {
+		return room;
 	}
 
 	public Date getStartDate() {
@@ -52,5 +53,15 @@ public class Reservation {
 		return totalCost;
 	}
 	
-	
+	/**
+	 * String representation of reservation information
+	 * @return the reservation information
+	 */
+	public String toString() {
+		return String.format("%s \n%s to %s \nCost: %d days X $%.2f a night = "
+				+ "$%.2f", room.toString(), 
+				new SimpleDateFormat("MM/dd/yyyy").format(startDate),
+				new SimpleDateFormat("MM/dd/yyyy").format(endDate),
+				numOfDays, room.getCostPerNight(), numOfDays * room.getCostPerNight());
+	}
 }

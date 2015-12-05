@@ -30,6 +30,6 @@ public class Room {
 	}
 	
 	public String toString() {
-		return roomType + " " + "$" + costPerNight + " per night";
+		return roomType + "\n" + "$" + costPerNight + " per night";
 	}
 }

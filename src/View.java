@@ -21,12 +21,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DefaultCaret;
 
 /**
  * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
@@ -65,6 +67,7 @@ public class View {
 		cards.add(getWelcomePanel("Room Service"), "Room Service");
 		cards.add(getWelcomePanel("Receptionist"), "Receptionist");
 		cards.add(getMakeReservationPanel(), "Book");
+		cards.add(getReceiptPanel(), "Receipt");
 
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
@@ -525,12 +528,11 @@ public class View {
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setLayoutOrientation(JList.VERTICAL);
 		list.setVisibleRowCount(-1);
+		panel.addComponent(list);
 		JScrollPane listScroller = new JScrollPane(list);
 		panel.addComponent(listScroller, 0, 4);
 		
 		c.weighty = 0;
-		c.gridwidth = 0;
-		panel.addNavigationButton("Back", 16, "Customer", 0, 3);
 		
 		JButton searchBtn = new JButton("Search for rooms");
 		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -582,13 +584,12 @@ public class View {
 				if (room != null) {
 					if (model.addReservation(room.getRoomId(), checkIn.getText(), checkOut.getText())) {
 						int response = JOptionPane.showConfirmDialog(
-								new JFrame(), "<html>Your reservation has been saved.<br>"
+								new JFrame(), "Your reservation has been saved.<br>"
 										+ "Would you like to make more transactions?</html>",
 										"Confirmation", JOptionPane.YES_NO_OPTION,
 										JOptionPane.QUESTION_MESSAGE);
 						if (response == JOptionPane.NO_OPTION) switchPanel("Receipt");
 						if (response == JOptionPane.YES_OPTION) ;
-
 						panel.clearComponents();
 					}
 				}
@@ -617,20 +618,68 @@ public class View {
 		panel.addComponent(doneBtn, 1, 5);
 
 		c.gridwidth = 2;
-		JButton button = new JButton("Back");
-		button.setFont(new Font("Tahoma", Font.BOLD, 12));
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				panel.clearComponents();
-				switchPanel(model.getCurrentRole());
-			}
-		});
-		panel.addComponent(button, 0, 6);
+		panel.addNavigationButton("Back", 12, "Customer", 0, 6);
 		
 		return panel;
 	}
 
+	private JPanel getReceiptPanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+	
+		c.gridwidth = 1;
+		c.ipady = 30;
+		panel.addLabel("Receipt", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+		
+		c.ipady = 0;
+		c.weighty = 1;
+		c.insets = new Insets(10,10,10,10);
+		final JTextArea receipt = new JTextArea();
+		receipt.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(receipt,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		DefaultCaret caret = (DefaultCaret) receipt.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		panel.addComponent(scrollPane, 0, 2);
+
+		model.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (!model.getReservations().isEmpty()) {
+					Account user = model.getCurrentUser();
+					String text = "Username: " + user.getUsername() + "\nName: " + user.getFirstName() 
+					+ " " + user.getLastName() + "\n";
+					
+					double cost = 0;
+					int i = 1;
+					for (Reservation r : model.getReservations()) {
+						text += String.format("\n\nReservation # %d\n%s", i, r.toString());
+						cost += r.getTotalCost();
+						i++;
+					}
+					
+					text += String.format("\n\nTotal: $%.2f", cost);
+					
+					receipt.setText(text);
+				}
+			};
+		});
+
+		c.weighty = 0;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				model.clearResrvations();
+				panel.clearComponents();
+				view.switchPanel("Customer");
+			}
+		});
+		panel.addComponent(backBtn, 0, 3);
+		return panel;
+	}
+	
 	private GregorianCalendar isValidDateFormat(String input) {
 		try {
 			dateFormatter.setLenient(false);

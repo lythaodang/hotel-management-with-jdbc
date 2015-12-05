@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -71,6 +70,10 @@ public class BasicPanel extends JPanel {
 		c.gridy = y;
 		add(comp, c);
 		
+		addComponent(comp);
+	}
+	
+	public void addComponent(JComponent comp) {
 		if (comp instanceof JTextField)
 			tfs.add((JTextField) comp);
 		if (comp instanceof JTextArea)
@@ -170,7 +173,7 @@ public class BasicPanel extends JPanel {
 		for (JComboBox cb : cbs)
 			cb.setSelectedIndex(0);
 		for (JList l : ls) 
-			l.removeAll();
+			l.setListData(new Object[1]);
 	}
 
 	public GridBagConstraints getConstraints() {
