@@ -87,7 +87,8 @@ public class View {
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
 		cards.add(getFeedbackPanel(), "Feedback");
-
+		
+		cards.add(getViewRoomServicePanel(), "View Room Service");
 
 
 		frame.add(cards); // add the panel with card layout to the frame
@@ -500,7 +501,10 @@ public class View {
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
 			panel.addNavigationButton("View/Cancel Reservations", 16, "View/Cancel", 0, 2);
-			panel.addNavigationButton("Order Room Service", 16, "View/Order Room Service", 0, 3);
+			c.gridwidth = 1;
+			panel.addNavigationButton("View Room Service", 16, "View Room Service", 1, 3);
+			panel.addNavigationButton("Order Room Service", 16, "Order Room Service", 0, 3);
+			c.gridwidth = 2;
 			panel.addNavigationButton("Give Feedback", 16, "Give Feedback", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
@@ -777,6 +781,34 @@ public class View {
 		return panel;
 	}
 
+	/**
+	 * Get view of room service requested by Customer
+	 * @return panel
+	 */
+	private JPanel getViewRoomServicePanel(){
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+		c.weightx = 1;
+		c.weighty = 0;
+		
+		/** need to retrieve info from database **/
+		String userID = "USERID";
+		String roomID= "ROOMID";
+		String task = "TASK";
+		
+		panel.addLabel("View of Room Service (CUSTOMER)", 16, "center", null, null, 0, 0);
+		panel.addLabel("UserID:  " + userID, 16, "left", null, null, 0, 1);
+		
+		panel.addLabel("RoomID:  " + roomID, 16, "left", null, null, 0, 2);
+		panel.addLabel("Task: "  + task, 16, "left", null, null, 0, 3);
+		
+		panel.addNavigationButton("CHANGE", 16, "Room Service", 0, 6);
+		panel.addNavigationButton("BACK", 16, "Customer", 1, 6);
+		panel.addNavigationButton("CANCEL", 16,"Customer", 2,6);
+		return panel;
+	}
+	
+	
 	//Kun added
 	private JPanel getGiveFeedbackPanel() {
 
