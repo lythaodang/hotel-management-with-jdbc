@@ -867,35 +867,13 @@ public class View {
 			}
 		});
 
-		model.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (model.getCurrentUser() != null) {
-					ArrayList<Reservation> res = model.getAllReservations();
-					if (res != null)
-						list.setText(formatReservations(res));
-					else 
-						JOptionPane.showMessageDialog(new JFrame(), 
-								"An unexpected error has occurred. Please contact your system admin.", "Error", 
-								JOptionPane.ERROR_MESSAGE);
-				}
-
-			}
-		});
-
 		c.weighty = 0;
 		JButton backBtn = new JButton("Back to main menu");
 		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 		backBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ArrayList<Reservation> res = model.getAllReservations();
-				if (res != null)
-					list.setText(formatReservations(res));
-				else 
-					JOptionPane.showMessageDialog(new JFrame(), 
-							"An unexpected error has occurred. Please contact your system admin.", "Error", 
-							JOptionPane.ERROR_MESSAGE);
+				panel.clearComponents();
 				view.switchPanel(model.getCurrentRole());
 			}
 		});
