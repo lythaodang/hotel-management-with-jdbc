@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -30,7 +31,10 @@ public class Model {
 	private Account currentUser;
 	private String currentRole;
 	private ArrayList<Reservation> reservations;
-
+	
+	//Kun added
+	private ArrayList<Complaint> complaints;
+	
 	// variables used for manager
 	private Connection connection = JDBCUtil.getConnectionByDriverManager();
 	private Statement statement = JDBCUtil.getStatement(connection);
@@ -48,6 +52,7 @@ public class Model {
 		currentUser = null;
 		currentRole = null;
 		reservations = new ArrayList<Reservation>();
+		complaint = new ArrayList<Complaint>();
 	}
 
 	/**
@@ -239,9 +244,13 @@ public class Model {
 	public ArrayList<Reservation> getReservations() {
 		return reservations;
 	}
-
+	
 	public void clearResrvations() {
 		reservations = new ArrayList<Reservation>();
+}
+
+	public ArrayList<Complaints> getComplaints() {
+		return complaints;
 	}
 	
 	/**
@@ -260,4 +269,31 @@ public class Model {
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
 	}
+	
+	//Kun added
+	/**
+	 * Add an account to the database.
+	 * @param account the account to add
+	 */
+	public boolean addComplaint(String complaintTest, Account user) {	
+		
+		final GregorianCalendar time = new GregorianCalendar();
+		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
+		Complaint complaintObject = new Complaint(complaintTest, time, "", "", user);
+		
+		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
+				+ " VALUES('%s','%s')", 
+				user.getUsername(), complaintTest);
+
+		try {
+			statement.execute(query);
+			complaints.add(complaintObject);
+			System.out.println("complaint: " + complaints.size());
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 }

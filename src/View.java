@@ -71,6 +71,8 @@ public class View {
 
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
+		cards.add(getVieworCancelPanel(), "View/Cancel");
+		
 		
 		
 		frame.add(cards); // add the panel with card layout to the frame
@@ -704,24 +706,141 @@ public class View {
 		return count;
 	}
 	
+	//Kun added
 	private JPanel getGiveFeedbackPanel() {
 	
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 	
 		c.weighty = 1;
-		c.gridwidth = 1;
+		c.insets = new Insets(10,10,10,10);
+		final JLabel profile = new JLabel();
+		model.addChangeListener(new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent event)
+					{
+						if (model.getCurrentUser() != null) {
+							Account user = model.getCurrentUser();
+							profile.setText("<html>Username: " + user.getUsername() 
+							+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
+							+ "<br>Role: " + user.getRole());
+						}
+					}
+				});
+		panel.addComponent(profile, 0, 0);
+		c.weighty = 0;
 
 		panel.addLabel("complaint", 16, "left", null, null, 0, 1);
-
+		c.weighty = 1;
+		c.gridwidth = 1;
 		final JTextField complaint = new JTextField();
 		panel.addComponent(complaint, 0, 2);
 
 		c.weighty = 0;
 		c.gridwidth = 0;
-		panel.addNavigationButton("Back", 16, "Customer", 0, 3);
+		panel.addNavigationButton("Back", 16, "Customer", 0, 4);
 		
+		JButton SumbitButton = new JButton("Sumbit");
+		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
+		SumbitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean validEntry = true;
+				String errors = "<html>The following are not valid entries:<br>";
+				
+				String complaintTest = complaint.getText();
+				if (complaintTest.isEmpty() || complaintTest.length() < 1)
+				{
+					complaint.setText("");
+					validEntry = false;
+					errors += "complaint Test has to greater than 1 character<br>";
+				}
+				
+				if (validEntry) {
+					panel.clearComponents();
+					if (model.addComplaint(complaintTest, model.getCurrentUser())) {	
+						
+						model.setCurrentUser(model.getCurrentUser().getUsername());
+						JOptionPane.showMessageDialog(new JFrame(), "Successful!", "Result", JOptionPane.DEFAULT_OPTION);
+						view.switchPanel(model.getCurrentRole());
+					}
+				}
+				else
+					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
+			};
+		});
+		panel.addComponent(SumbitButton, 0, 3);
 		
+	
+		return panel;
+	}
+	
+	//Kun added
+	private JPanel getVieworCancelPanel() {
+		
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+	
+		c.weighty = 1;
+		c.insets = new Insets(10,10,10,10);
+		final JLabel profile = new JLabel();
+		model.addChangeListener(new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent event)
+					{
+						if (model.getCurrentUser() != null) {
+							Account user = model.getCurrentUser();
+							profile.setText("<html>Username: " + user.getUsername() 
+							+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
+							+ "<br>Role: " + user.getRole());
+						}
+					}
+				});
+		panel.addComponent(profile, 0, 0);
+		c.weighty = 0;
+
+		panel.addLabel("complaint", 16, "left", null, null, 0, 1);
+		c.weighty = 1;
+		c.gridwidth = 1;
+		final JTextField complaint = new JTextField();
+		panel.addComponent(complaint, 0, 2);
+
+		c.weighty = 0;
+		c.gridwidth = 0;
+		panel.addNavigationButton("Back", 16, "Customer", 0, 4);
+		
+		JButton SumbitButton = new JButton("Sumbit");
+		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
+		SumbitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boolean validEntry = true;
+				String errors = "<html>The following are not valid entries:<br>";
+				
+				String complaintTest = complaint.getText();
+				if (complaintTest.isEmpty() || complaintTest.length() < 1)
+				{
+					complaint.setText("");
+					validEntry = false;
+					errors += "complaint Test has to greater than 1 character<br>";
+				}
+				
+				if (validEntry) {
+					panel.clearComponents();
+					if (model.addComplaint(complaintTest, model.getCurrentUser())) {	
+						
+						model.setCurrentUser(model.getCurrentUser().getUsername());
+						JOptionPane.showMessageDialog(new JFrame(), "Successful!", "Result", JOptionPane.DEFAULT_OPTION);
+						view.switchPanel(model.getCurrentRole());
+					}
+				}
+				else
+					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
+			};
+		});
+		panel.addComponent(SumbitButton, 0, 3);
+		
+	
 		return panel;
 	}
 }
