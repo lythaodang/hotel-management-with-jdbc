@@ -1,5 +1,5 @@
 /**
- * COPYRIGHT 2015 TupleMeOver. All lefts Reserved. 
+ * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
  * Hotel Management 
  * CS157A Group Project
  * @author Kun Su, Ly Dang, Lynn Longboy
@@ -10,6 +10,7 @@ public class Runner {
 	
 	public static void main(String args[]) {
 		Model model = new Model();
+		@SuppressWarnings("unused")
 		View view = new View(model);
 	}
 }

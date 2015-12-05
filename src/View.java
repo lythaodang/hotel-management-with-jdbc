@@ -16,10 +16,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
@@ -101,7 +104,7 @@ public class View {
 		c.gridwidth = 2;
 		c.ipady = 15;
 		panel.addLabel("Login", 36, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
+
 		c.insets = new Insets(10,15,5,15);
 		c.weightx = 0;
 		c.gridwidth = 1;
@@ -110,9 +113,9 @@ public class View {
 		panel.addLabel("Username:", 20, "center", null, null, 0, 2);
 		final JTextField usernameField = new JTextField();
 		panel.addComponent(usernameField, 1, 2);
-		
+
 		c.insets = new Insets(5,15,5,15);
-		
+
 		panel.addLabel("Password:", 20, "center", null, null, 0, 3);
 		final JPasswordField passwordField = new JPasswordField();
 		panel.addComponent(passwordField, 1, 3);
@@ -146,21 +149,21 @@ public class View {
 			}
 		});
 		panel.addComponent(loginBtn, 0, 4);
-		
+
 		c.gridwidth = 1;
 		panel.addNavigationButton("Forgot Password?", 14, "Forgot Password", 0, 5);
 		panel.addNavigationButton("Register", 14, "Choose Role", 1, 5);
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getChooseRolePanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 		c.weighty = 1;
-		
+
 		panel.addLabel("Choose a role", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
+
 		c.insets = new Insets(10,25,10,25);
 		JButton custBtn = new JButton("Customer");
 		custBtn.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -172,7 +175,7 @@ public class View {
 			}
 		});
 		panel.addComponent(custBtn, 0, 1);
-		
+
 		JButton mgrBtn = new JButton("Manager");
 		mgrBtn.setFont(new Font("Tahoma", Font.BOLD, 20));
 		mgrBtn.addActionListener(new ActionListener() {
@@ -183,7 +186,7 @@ public class View {
 			}
 		});
 		panel.addComponent(mgrBtn, 0, 2);
-		
+
 		JButton recBtn = new JButton("Receptionist");
 		recBtn.setFont(new Font("Tahoma", Font.BOLD, 20));
 		recBtn.addActionListener(new ActionListener() {
@@ -194,7 +197,7 @@ public class View {
 			}
 		});
 		panel.addComponent(recBtn, 0, 3);
-		
+
 		JButton rsBtn = new JButton("Room Service");
 		rsBtn.setFont(new Font("Tahoma", Font.BOLD, 20));
 		rsBtn.addActionListener(new ActionListener() {
@@ -205,12 +208,12 @@ public class View {
 			}
 		});
 		panel.addComponent(rsBtn, 0, 4);
-		
+
 		panel.addNavigationButton("Back", 12, "Login", 0, 11);
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getRegisterPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -227,7 +230,7 @@ public class View {
 				}
 			};
 		});
-		
+
 		c.weightx = 0;
 		c.insets = new Insets(5,25,5,25);
 		c.gridwidth = 1;
@@ -237,10 +240,10 @@ public class View {
 		panel.addLabel("Password (8 to 20 chars)", 12, "left", null, null, 0, 4);
 		panel.addLabel("Age", 12, "left", null, null, 0, 5);
 		panel.addLabel("Gender", 12, "left", null, null, 0, 6);
-		panel.addLabel("Security Question (20 to 50 chars)", 12, "left", null, null, 0, 7);
-		panel.addLabel("Security Answer (10 to 30 chars)", 12, "left", null, null, 0, 8);
+		panel.addLabel("Security Question (10 to 50 chars)", 12, "left", null, null, 0, 7);
+		panel.addLabel("Security Answer (5 to 30 chars)", 12, "left", null, null, 0, 8);
 		panel.addNavigationButton("Back", 16, "Choose Role", 0, 9);
-		
+
 		c.weightx = 1;
 		c.gridwidth = 3;
 		final JTextField firstName = new JTextField();
@@ -251,18 +254,18 @@ public class View {
 
 		final JTextField username = new JTextField();
 		panel.addComponent(username, 1, 3);
-		
+
 		final JPasswordField password = new JPasswordField();
 		panel.addComponent(password, 1, 4);
-		
+
 		List<String> age = new ArrayList<String>();
 		age.add("Select Age");
 		for (int i = 18; i < 100; ++i)
-		    age.add(String.valueOf(i));
+			age.add(String.valueOf(i));
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final JComboBox ageComboBox = new JComboBox(age.toArray());
 		panel.addComponent(ageComboBox, 1, 5);
-		
+
 		List<String> gender = new ArrayList<String>();
 		gender.add("Select Gender");
 		gender.add("Female");
@@ -271,10 +274,10 @@ public class View {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final JComboBox genderComboBox = new JComboBox(gender.toArray());
 		panel.addComponent(genderComboBox, 1, 6);
-		
+
 		final JTextField securityQuestion = new JTextField();
 		panel.addComponent(securityQuestion, 1, 7);
-		
+
 		final JTextField securityAnswer = new JTextField();
 		panel.addComponent(securityAnswer, 1, 8);
 
@@ -285,35 +288,35 @@ public class View {
 			public void actionPerformed(ActionEvent arg0) {
 				boolean validEntry = true;
 				String errors = "<html>The following are not valid entries:<br>";
-				
+
 				String first = firstName.getText();
 				if (first.isEmpty() || first.length() > 15) {
 					firstName.setText("");
 					validEntry = false;
 					errors += "First name<br>";
 				}
-				
+
 				String last = lastName.getText();
 				if (last.isEmpty() || last.length() > 15) {
 					lastName.setText("");
 					validEntry = false;
 					errors += "Last name<br>";
 				}
-				
+
 				String login = username.getText();
 				if (login.length() < 6 || login.length() > 12 || model.checkUserExistence(login)) {
 					username.setText("");
 					validEntry = false;
 					errors += "Username<br>";
 				}
-						
+
 				String pass = new String(password.getPassword()); 
-				if (pass.length() > 20) {
+				if (pass.length() > 20 && pass.length() < 8) {
 					password.setText("");
 					validEntry = false;
 					errors += "Password<br>";
 				}
-				
+
 				Integer age = null;
 				try {
 					age = Integer.parseInt((String)ageComboBox.getSelectedItem());
@@ -322,7 +325,7 @@ public class View {
 					validEntry = false;
 					errors += "Age<br>";
 				}
-				
+
 				String gen = (String)genderComboBox.getSelectedItem();
 				if (gen.equals("Female"))
 					gen = "F";
@@ -334,43 +337,45 @@ public class View {
 					validEntry = false;
 					errors += "Gender<br>";
 				}
-				
+
 				String secQuestion = securityQuestion.getText();
-				if (secQuestion.length() > 50 || secQuestion.length() < 20) {
+				if (secQuestion.length() > 50 || secQuestion.length() < 10) {
 					securityQuestion.setText("");
 					validEntry = false;
 					errors += "Security Question<br>";
 				}
-					
+
 				String secAnswer = securityAnswer.getText();
-				if (secQuestion.length() > 30 || secQuestion.length() < 15) {
+				if (secQuestion.length() > 30 || secQuestion.length() < 5) {
 					securityAnswer.setText("");
 					validEntry = false;
 					errors += "Security Answer";
 				}
-				
+
 				if (validEntry) {
 					panel.clearComponents();
-					if (model.addAccount(login, pass, first, last, age, gen, model.getCurrentRole(), secQuestion, secAnswer)) {
-						model.setCurrentUser(login);
+					if (model.addAccount(login, pass, first, last, age, gen, model.getCurrentRole(), secQuestion, secAnswer))
 						view.switchPanel(model.getCurrentRole());
-					}
+					else
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"An unexpected error has occurred. Please contact your system admin.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
 				}
 				else
 					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 		panel.addComponent(registerBtn, 1, 9);
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getForgotPasswordPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 		c.gridwidth = 2;
 		panel.addLabel("Retrieve Password", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
+
 		c.insets = new Insets(20, 20, 20, 20);
 		c.ipady = 25;
 		panel.addInstructions("<html>Enter a valid username and a question will appear."
@@ -381,16 +386,16 @@ public class View {
 		panel.addLabel("Enter your username:", 16, "left", null, null, 0, 2);
 		panel.addLabel("Your security question:", 16, "left", null, null, 0, 3);
 		panel.addLabel("Enter your answer:", 16, "left", null, null, 0, 4);
-		
+
 		final JTextField userField = new JTextField();
 		panel.addComponent(userField, 1, 2);
-		
+
 		final JLabel questionField = new JLabel();
 		panel.addComponent(questionField, 1, 3);
-		
+
 		final JTextField answerField = new JTextField();
 		panel.addComponent(answerField, 1, 4);
-		
+
 		userField.addCaretListener(new CaretListener() {
 			@Override
 			public void caretUpdate(CaretEvent e) {
@@ -401,9 +406,9 @@ public class View {
 				}
 			}
 		});
-		
+
 		panel.addNavigationButton("Back", 16, "Login", 0, 5);
-		
+
 		JButton submitButton = new JButton("Get Password");
 		submitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
 		submitButton.addActionListener(new ActionListener() {
@@ -432,33 +437,33 @@ public class View {
 			}
 		});
 		panel.addComponent(submitButton, 1, 5);
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getWelcomePanel(String role) {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 		c.weighty = 1;
 		c.insets = new Insets(10,10,10,10);
-		
+
 		final JLabel profile = new JLabel();
 		model.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent event)
-					{
-						if (model.getCurrentUser() != null) {
-							Account user = model.getCurrentUser();
-							profile.setText("<html>Username: " + user.getUsername() 
-							+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-							+ "<br>Role: " + user.getRole());
-						}
-					}
-				});
+			@Override
+			public void stateChanged(ChangeEvent event)
+			{
+				if (model.getCurrentUser() != null) {
+					Account user = model.getCurrentUser();
+					profile.setText("<html>Username: " + user.getUsername() 
+					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
+					+ "<br>Role: " + user.getRole());
+				}
+			}
+		});
 		panel.addComponent(profile, 0, 0);
-		
+
 		panel.addSignOutButton(16, "Login", 1, 0);
-		
+
 		c.gridwidth = 2;
 		if (role.equalsIgnoreCase("manager")) {
 			panel.addNavigationButton("Reservations", 16, "Reservations", 0, 1);
@@ -485,40 +490,56 @@ public class View {
 			panel.addNavigationButton("Customers", 16, "Customers", 0, 3);
 			panel.addNavigationButton("Check Out", 16, "Check out", 0, 4);
 		}
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getMakeReservationPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
-		c.weighty = 1;
 		c.gridwidth = 2;
+		c.ipady = 15;
 		panel.addLabel("Reserve a Room", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
-		c.insets = new Insets(20, 20, 20, 20);
+
+		c.insets = new Insets(10, 10, 10, 10);
 		c.gridwidth = 1;
+		c.ipady = 0;
 		panel.addLabel("Check-in (MM/DD/YYYY):", 12, "left", null, null, 0, 1);
 		panel.addLabel("Check-out (MM/DD/YYYY):", 12, "left", null, null, 1, 1);
-	
+
 		c.gridwidth = 1;
 		final JTextField checkIn = new JTextField();
 		panel.addComponent(checkIn, 0, 2);
-		
+
 		final JTextField checkOut = new JTextField();
 		panel.addComponent(checkOut, 1, 2);
-		
+
+		c.gridwidth = 2;
+		c.weighty = 1;
+		@SuppressWarnings({ "rawtypes"})
+		final JList list = new JList();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
+		JScrollPane listScroller = new JScrollPane(list);
+		panel.addComponent(listScroller, 0, 4);
+
+		c.weighty = 0;
 		JButton searchBtn = new JButton("Search for rooms");
 		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		searchBtn.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
 			@Override() 
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
+				list.setListData(new Object[1]);
 				String in = checkIn.getText();
-				String out = checkIn.getText();
+				String out = checkOut.getText();
 				GregorianCalendar inCal;
 				GregorianCalendar outCal;
-				if (in.length() != 10 || out.length() != 10) {
-					if ((inCal = isValidDateFormat(in)) != null && (outCal = isValidDateFormat(out)) != null) {
+				if (in.length() == 10 && out.length() == 10) {
+					inCal = isValidDateFormat(in);
+					outCal = isValidDateFormat(out);
+					if (inCal != null && outCal != null) {
 						if (inCal.before(Model.TODAY) || outCal.before(Model.TODAY))
 							JOptionPane.showMessageDialog(new JFrame(),
 									"Error: Date(s) prior to today.", "Error",
@@ -532,33 +553,91 @@ public class View {
 									"Error: Reservation cannot be longer than 60 days.", "Error",
 									JOptionPane.ERROR_MESSAGE);
 						else {
-							//model.getAvailRooms(in, out);
-						}	
+							if (model.getAvailRooms(in, out) != null)
+								list.setListData(model.getAvailRooms(in, out).toArray());
+						}
 					}
 					else 
 						JOptionPane.showMessageDialog(new JFrame(),
-								"Error: Invalid date(s).", "Error",
+								"Error: Invalid formats.", "Error",
 								JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
+		panel.addComponent(searchBtn, 0, 3);
+
+		c.gridwidth = 1;
+		JButton confirmBtn = new JButton("Confirm");
+		confirmBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Room room = (Room)list.getSelectedValue();
+				if (room != null) {
+					if (model.addReservation(room.getRoomId(), checkIn.getText(), checkOut.getText())) {
+						int response = JOptionPane.showConfirmDialog(
+								new JFrame(), "<html>Your reservation has been saved.<br>"
+										+ "Would you like to make more transactions?</html>",
+										"Confirmation", JOptionPane.YES_NO_OPTION,
+										JOptionPane.QUESTION_MESSAGE);
+						if (response == JOptionPane.NO_OPTION) switchPanel("Receipt");
+						if (response == JOptionPane.YES_OPTION) ;
+
+						panel.clearComponents();
+					}
+				}
+				else
+					JOptionPane.showMessageDialog(new JFrame(),
+							"Error: No room has been selected.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		panel.addComponent(confirmBtn, 0, 5);
+
+		JButton doneBtn = new JButton("Transaction Done");
+		doneBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (model.getReservations().isEmpty()) 
+					JOptionPane.showMessageDialog(new JFrame(),
+							"Error: No reservations have been made.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				else {
+					panel.clearComponents();
+					switchPanel("Receipt");
+				}
+			}
+		});
+		panel.addComponent(doneBtn, 1, 5);
+
+		c.gridwidth = 2;
+		JButton button = new JButton("Back");
+		button.setFont(new Font("Tahoma", Font.BOLD, 12));
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				panel.clearComponents();
+				switchPanel(model.getCurrentRole());
+			}
+		});
+		panel.addComponent(button, 0, 6);
 		
 		return panel;
 	}
-	
+
 	private GregorianCalendar isValidDateFormat(String input) {
 		try {
 			dateFormatter.setLenient(false);
 			GregorianCalendar cal = new GregorianCalendar();
 			Date d = dateFormatter.parse(input);
 			cal.setTime(d);
-			
+
 			return cal;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	private int checkDaysBetween(GregorianCalendar checkIn, GregorianCalendar checkOut) {
 		GregorianCalendar temp = (GregorianCalendar) checkIn.clone();
 		int count = 0;

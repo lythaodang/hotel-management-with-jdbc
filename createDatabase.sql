@@ -46,7 +46,6 @@ DROP TABLE IF EXISTS roomservice;
 CREATE TABLE roomservice (
 	taskId INT(10) NOT NULL AUTO_INCREMENT,
 	task VARCHAR(250) NOT NULL,
-	customer VARCHAR(12) NOT NULL,
 	roomId INT(10) NOT NULL,
     completedBy VARCHAR(12),
 	reservationId INT(10) NOT NULL,
@@ -55,7 +54,6 @@ CREATE TABLE roomservice (
     updatedOn TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (taskId),
     FOREIGN KEY (completedBy) references user (username) ON DELETE CASCADE,
-	FOREIGN KEY (customer) references user (username) ON DELETE CASCADE,
 	FOREIGN KEY (roomId) references room (roomId) ON DELETE CASCADE,
 	FOREIGN KEY (reservationId) references reservation (reservationId) ON DELETE CASCADE
 );

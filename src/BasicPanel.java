@@ -2,22 +2,23 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 /**
- * COPYRIGHT 2015 TupleMeOver. All lefts Reserved. 
+ * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
  * Hotel Management 
  * CS157A Group Project
  * @author Kun Su, Ly Dang, Lynn Longboy
@@ -34,18 +35,23 @@ public class BasicPanel extends JPanel {
 	private View manager;
 	private ArrayList<JTextField> tfs;
 	private ArrayList<JTextArea> tas;
+	@SuppressWarnings("rawtypes")
 	private ArrayList<JComboBox> cbs;
+	@SuppressWarnings("rawtypes")
+	private ArrayList<JList> ls;
 	
 	/** 
 	 * Constructs the panel with a view manager.
 	 * @param manager the view manager
 	 */
+	@SuppressWarnings("rawtypes")
 	public BasicPanel(View manager) {
 		this.manager = manager;
 		model = manager.getModel();
 		tfs = new ArrayList<JTextField>();
 		tas = new ArrayList<JTextArea>();
 		cbs = new ArrayList<JComboBox>();
+		ls = new ArrayList<JList>();
 		
 		this.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -59,6 +65,7 @@ public class BasicPanel extends JPanel {
 	 * @param x the x location
 	 * @param y the y location
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addComponent(JComponent comp, int x, int y) {
 		c.gridx = x;
 		c.gridy = y;
@@ -70,6 +77,8 @@ public class BasicPanel extends JPanel {
 			tas.add((JTextArea) comp);
 		if (comp instanceof JComboBox)
 			cbs.add((JComboBox) comp);
+		if (comp instanceof JList)
+			ls.add((JList) comp);
 	}
 	
 	/**
@@ -152,6 +161,7 @@ public class BasicPanel extends JPanel {
 	/**
 	 * Clears all textfields and textareas on the panel.
 	 */
+	@SuppressWarnings({ "rawtypes" })
 	public void clearComponents() {
 		for (JTextField tf : tfs)
 			tf.setText("");
@@ -159,6 +169,8 @@ public class BasicPanel extends JPanel {
 			ta.setText("");
 		for (JComboBox cb : cbs)
 			cb.setSelectedIndex(0);
+		for (JList l : ls) 
+			l.removeAll();
 	}
 
 	public GridBagConstraints getConstraints() {

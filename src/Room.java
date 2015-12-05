@@ -1,3 +1,10 @@
+/**
+ * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
+ * Hotel Management 
+ * CS157A Group Project
+ * @author Kun Su, Ly Dang, Lynn Longboy
+ * @version 1.00 2015/11/01
+ */
 
 public class Room {
 	private int roomId;
@@ -20,5 +27,9 @@ public class Room {
 	
 	public String getRoomType() {
 		return roomType;
+	}
+	
+	public String toString() {
+		return roomType + " " + "$" + costPerNight + " per night";
 	}
 }

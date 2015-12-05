@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 
-import Fix.Reservation;
-
 /**
  * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
  * Hotel Management 
@@ -46,21 +44,5 @@ public class Account {
 	
 	public ArrayList<Reservation> getReservations() {
 		return reservations;
-	}
-
-	/**
-	 * Adds the reservation.
-	 * @param r the reservation
-	 */
-	public void addReservation(Reservation r) {
-		reservations.add(r);
-	}
-
-	/**
-	 * Cancels the reservation.
-	 * @param r the reservation
-	 */
-	public void cancelReservation(Reservation r) {
-		reservations.remove(r);
 	}
 }

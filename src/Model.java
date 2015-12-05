@@ -30,6 +30,7 @@ public class Model {
 	// variables used for the transaction
 	private Account currentUser;
 	private String currentRole;
+	private ArrayList<Reservation> reservations;
 
 	// variables used for manager
 	private Connection connection = JDBCUtil.getConnectionByDriverManager();
@@ -47,14 +48,7 @@ public class Model {
 		listeners = new ArrayList<>();
 		currentUser = null;
 		currentRole = null;
-	}
-
-	/**
-	 * Adds the changelisteners
-	 * @param accounts the accounts to set
-	 */
-	public void addChangeListener(ChangeListener listener) {
-		listeners.add(listener);
+		reservations = new ArrayList<Reservation>();
 	}
 
 	/**
@@ -75,6 +69,7 @@ public class Model {
 
 		try {
 			statement.execute(query);
+			setCurrentUser(username);
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -82,42 +77,54 @@ public class Model {
 		}
 	}
 	
-	public Account getCurrentUser() {
-		return currentUser;
+	public boolean addReservation(int roomId, String checkIn, String checkOut) {
+		String query = String.format("insert into reservation(roomId, customer, startDate, endDate) values ('%s','%s',%s,%s)",
+				roomId, currentUser.getUsername(), toDateSQL(checkIn), toDateSQL(checkOut));
+		System.out.println(query);
+		try {
+			statement.execute(query);
+			setCurrentUser(currentUser.getUsername());
+			ArrayList<Reservation> res = currentUser.getReservations();
+			reservations.add(res.get(res.size() - 1));
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public void setCurrentUser(String username) {
+		if (username == null) {
+			currentUser = null;
+			currentRole = null;
+			return;
+		}
+		
 		String query = "SELECT username, firstname, lastname, userrole FROM USER WHERE username = '" + username + "'";
 
 		try {
-			String userName, firstName, lastName, role;
+			String role;
 
 			ResultSet rs = statement.executeQuery(query);
 			if (rs.next()) {
-				userName = rs.getString(1);
-				firstName = rs.getString(2);
-				lastName = rs.getString(3);
-				role = rs.getString(4);
-				setCurrentRole(role);
-				currentUser = new Account(firstName, lastName, userName, role);
+				setCurrentRole(role = rs.getString("userrole"));
+				currentUser = new Account(rs.getString("firstname"), rs.getString("lastname"), rs.getString("username"), role);
 				update();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * The current user's role.
-	 * @return role customer, manager, room service, or receptionist
-	 */
-	public String getCurrentRole() {
-		return currentRole;
-	}
-
-	public void setCurrentRole(String role) {
-		currentRole = role;
-		update();
+		
+		query = "select reservationId, roomId, startDate, endDate, numOfDays, totalCost from reservation where customer = '" + username + "'";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			if (rs.next()) {
+				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), rs.getInt("roomid"), rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
+				update();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean checkUserExistence(String username) {
@@ -126,7 +133,7 @@ public class Model {
 		try {
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
-				if (rs.getString(1).equals(username)) return true;
+				if (rs.getString("username").equals(username)) return true;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -140,7 +147,7 @@ public class Model {
 
 		try {
 			ResultSet rs = statement.executeQuery(query);
-			if (rs.next() && rs.getString(1).equals(password)) return true;
+			if (rs.next() && rs.getString("password").equals(password)) return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -154,7 +161,7 @@ public class Model {
 		try {
 			ResultSet rs = statement.executeQuery(query);
 			if (rs.next()) {
-				return rs.getString(1);
+				return rs.getString("question");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -168,8 +175,8 @@ public class Model {
 
 		try {
 			ResultSet rs = statement.executeQuery(query);
-			if (rs.next() && rs.getString(1).equals(answer)) {
-				return rs.getString(2);
+			if (rs.next() && rs.getString("answer").equals(answer)) {
+				return rs.getString("password");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -178,6 +185,63 @@ public class Model {
 		return null;
 	}
 
+	public ArrayList<Room> getAvailRooms(String in, String out) {
+		ArrayList<Room> rooms = new ArrayList<>();
+		String checkIn = toDateSQL(in);
+		String checkOut = toDateSQL(out);
+		String query = "select * from room where roomId not in "
+				+ "(select distinct room.roomId "
+				+ "from room left outer join reservation on room.roomId = reservation.roomId "
+				+ "where " + checkIn + " = reservation.startdate"
+				+ " or " + checkIn + " = reservation.enddate"
+				+ " or " + checkOut + "= reservation.startdate"
+				+ " or " + checkOut + " = reservation.enddate"
+				+ " or " + "(reservation.startdate < " + checkOut + " and reservation.enddate > " + checkIn + ")"
+				+ " or (" + checkIn + " < reservation.startdate and " + checkOut + " > reservation.startdate)"
+				+ " or (" + checkIn + " < reservation.enddate and " + checkOut + " > reservation.enddate))";
+
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				rooms.add(new Room(rs.getInt("roomid"), rs.getDouble("costpernight"), rs.getString("roomtype")));
+			}
+			return rooms;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public String toDateSQL(String date) {
+		return "str_to_date('" + date + "', '%m/%d/%Y')";
+	}
+	
+	public String getCurrentRole() {
+		return currentRole;
+	}
+
+	public void setCurrentRole(String role) {
+		currentRole = role;
+		update();
+	}
+	
+	public Account getCurrentUser() {
+		return currentUser;
+	}
+	
+	public ArrayList<Reservation> getReservations() {
+		return reservations;
+	}
+
+	/**
+	 * Adds the changelisteners
+	 * @param accounts the accounts to set
+	 */
+	public void addChangeListener(ChangeListener listener) {
+		listeners.add(listener);
+	}
+	
 	/**
 	 * Notifies the observers that there has been a change.
 	 */
@@ -186,22 +250,4 @@ public class Model {
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
 	}
-	
-	/*
-	public ArrayList<Room> getAvailRooms(String in, String out) {
-		ArrayList<Room> rooms = new ArrayList<>();
-		String query = "SELECT * FROM ROOM WHERE  = '" + username + "'";
-
-		try {
-			ResultSet rs = statement.executeQuery(query);
-			while (rs.next() && rs.getString(1).equals(answer)) {
-				rooms.add(new Room(String.parseInt(rs.getString(1)), rs.getString(2), rs.getString(3));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-	*/
 }

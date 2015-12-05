@@ -8,7 +8,7 @@ import java.util.Properties;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 /**
- * COPYRIGHT 2015 TupleMeOver. All lefts Reserved. 
+ * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
  * Hotel Management 
  * CS157A Group Project
  * @author Kun Su, Ly Dang, Lynn Longboy

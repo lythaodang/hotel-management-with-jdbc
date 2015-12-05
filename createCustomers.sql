@@ -8,9 +8,9 @@ insert into user (userName, password, firstName, lastName, age, gender, userRole
 values ("manager", "managerpwd", "manager_fn", "manager_ln", 18, "M", "manager", "Favorite city", "Paris");
 
 insert into user (userName, password, firstName, lastName, age, gender, userRole, question, answer)
-values ("receptionist", "receptionistpwd", "receptionist_fn", "receptionist_ln", 65, "F", "receptionist", "First pet's name", "Yuki");
+values ("receptionist", "receptionistpwd", "receptionist_fn", "receptionist_ln", 65, "F", "receptionist", "First pet's name", "Ginger");
 
 insert into user (userName, password, firstName, lastName, age, gender, userRole, question, answer)
-values ("roomservice", "roomservicepwd", "roomservice_fn", "roomservice_ln", 50, "M", "room service", "First job", "receptionist");
+values ("roomservice", "roomservicepwd", "roomservice_fn", "roomservice_ln", 50, "M", "room service", "What was my first job?", "receptionist");
 
 SELECT * FROM user;
