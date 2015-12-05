@@ -98,6 +98,19 @@ public class Model {
 		}
 	}
 
+	public boolean cancelReservation(Reservation r) {
+		String query = "update reservation set canceled = true where reservationid = " + r.getReservationId(); 
+		try {
+			statement.execute(query);
+			setCurrentUser(currentUser.getUsername());
+			update();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 	public void setCurrentUser(String username) {
 		if (username == null) {
 			currentUser = null;
@@ -122,7 +135,7 @@ public class Model {
 
 		String queryRes = "select reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room left outer join reservation on room.roomid = reservation.roomid "
-				+ "where customer ='" + username + "'";
+				+ "where customer ='" + username + "' and canceled <> true";
 		try {
 			ResultSet rs = statement.executeQuery(queryRes);
 			while (rs.next()) {

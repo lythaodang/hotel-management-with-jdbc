@@ -66,15 +66,30 @@ public class View {
 		cards.add(getWelcomePanel("Manager"), "Manager");
 		cards.add(getWelcomePanel("Room Service"), "Room Service");
 		cards.add(getWelcomePanel("Receptionist"), "Receptionist");
+		
+		// customer panels
 		cards.add(getMakeReservationPanel(), "Book");
 		cards.add(getReceiptPanel(), "Receipt");
+		cards.add(getCustViewCancelPanel(), "View/Cancel");
+		// cards.add(getCustRoomServicePanel(), "View/Order Room Service");
+		// cards.add(getGiveFeedbackPanel(), "Give Feedback");
+		
+		// employee panels
+		// cards.add(getReservationsPanel(), "Reservations");
+		// cards.add(getRoomServicePanel(), "Room Service");
+		// cards.add(getFeedbackPanel(), "Feedback");
+		// cards.add(getUsersPanel(), "User");
+		// cards.add(getStatisticsPanel(), "Statistics");
+		// cards.add(getArchivePanel(), "Archive");
+		// cards.add(getCustomersPanel(), "Customers");
+		// cards.add(getCheckOutPanel(), "Check out");
 
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
 		cards.add(getFeedbackPanel(), "Feedback");
-		
-		
-		
+
+
+
 		frame.add(cards); // add the panel with card layout to the frame
 
 		// below are the frame's characteristics
@@ -478,15 +493,14 @@ public class View {
 			panel.addNavigationButton("Reservations", 16, "Reservations", 0, 1);
 			panel.addNavigationButton("Room Service", 16, "Room Service", 0, 2);
 			panel.addNavigationButton("Feedback", 16, "Feedback", 0, 3);
-			panel.addNavigationButton("Employees", 16, "Employees", 0, 4);
-			panel.addNavigationButton("Customers", 16, "Customers", 0, 5);
+			panel.addNavigationButton("Users", 16, "Users", 0, 4);
 			panel.addNavigationButton("Statistics", 16, "Statistics", 0, 5);
-			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 5);
+			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 6);
 		}
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
 			panel.addNavigationButton("View/Cancel Reservations", 16, "View/Cancel", 0, 2);
-			panel.addNavigationButton("Order Room Service", 16, "Order Room Service", 0, 3);
+			panel.addNavigationButton("Order Room Service", 16, "View/Order Room Service", 0, 3);
 			panel.addNavigationButton("Give Feedback", 16, "Give Feedback", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
@@ -507,7 +521,7 @@ public class View {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 		c.gridwidth = 2;
-		c.ipady = 15;
+		c.ipady = 30;
 		panel.addLabel("Reserve a Room", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
 		c.insets = new Insets(10, 10, 10, 10);
@@ -533,9 +547,9 @@ public class View {
 		panel.addComponent(list);
 		JScrollPane listScroller = new JScrollPane(list);
 		panel.addComponent(listScroller, 0, 4);
-		
+
 		c.weighty = 0;
-		
+
 		JButton searchBtn = new JButton("Search for rooms");
 		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		searchBtn.addActionListener(new ActionListener() {
@@ -620,19 +634,34 @@ public class View {
 		panel.addComponent(doneBtn, 1, 5);
 
 		c.gridwidth = 2;
-		panel.addNavigationButton("Back", 12, "Customer", 0, 6);
-		
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (model.getReservations().isEmpty()) {
+					panel.clearComponents();
+					view.switchPanel("Customer");
+				} else {
+					JOptionPane.showMessageDialog(new JFrame(),
+							"Error: You must complete your transaction.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		panel.addComponent(backBtn, 0, 6);
+
 		return panel;
 	}
 
 	private JPanel getReceiptPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
-	
+
 		c.gridwidth = 1;
 		c.ipady = 30;
 		panel.addLabel("Receipt", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
+
 		c.ipady = 0;
 		c.weighty = 1;
 		c.insets = new Insets(10,10,10,10);
@@ -651,7 +680,7 @@ public class View {
 					Account user = model.getCurrentUser();
 					String text = "Username: " + user.getUsername() + "\nName: " + user.getFirstName() 
 					+ " " + user.getLastName() + "\nReservations made: " + model.getReservations().size();
-					
+
 					double cost = 0;
 					int i = 1;
 					for (Reservation r : model.getReservations()) {
@@ -659,9 +688,9 @@ public class View {
 						cost += r.getTotalCost();
 						i++;
 					}
-					
+
 					text += String.format("\n\nTotal: $%.2f", cost);
-					
+
 					receipt.setText(text);
 				}
 			};
@@ -681,28 +710,94 @@ public class View {
 		panel.addComponent(backBtn, 0, 3);
 		return panel;
 	}
-	
-	//Kun added
-	private JPanel getGiveFeedbackPanel() {
-	
+
+	private JPanel getCustViewCancelPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
-	
+
+		c.gridwidth = 1;
+		c.ipady = 30;
+		panel.addLabel("View or Cancel a Reservation", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.ipady = 0;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("<html>Below are all your reservations.<br>To cancel a "
+				+ "reservation: Select the one you wish to cancel. Press cancel.<br>"
+				+ "If the list is empty, then you have not made any reservations.</html>", 12, "left", 
+				null, null, 0, 1);
+
+		@SuppressWarnings("rawtypes")
+		final JList list = new JList();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
+		JScrollPane listScroller = new JScrollPane(list);
+		c.weighty = 1;
+		panel.addComponent(listScroller, 0, 2);
+		panel.addComponent(list);
+
+		model.addChangeListener(new ChangeListener() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (model.getCurrentUser() != null) list.setListData(model
+						.getCurrentUser().getReservations().toArray());
+				else list.setListData(new Reservation[0]);
+			}
+		});
+
+		c.weighty = 0;
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (!list.isSelectionEmpty()) {
+					int response = JOptionPane.showConfirmDialog(new JFrame(),
+							"Are you sure you want to cancel this reservation?",
+							"Confirmation", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.NO_OPTION) ;
+					if (response == JOptionPane.YES_OPTION) {
+						model.cancelReservation((Reservation) list.getSelectedValue());
+					}
+				}
+			}
+		});
+		panel.addComponent(cancelButton, 0, 3);
+
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.switchPanel("Customer");
+			}
+		});
+		panel.addComponent(backBtn, 0, 4);
+		return panel;
+	}
+
+	//Kun added
+	private JPanel getGiveFeedbackPanel() {
+
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
 		c.weighty = 1;
 		c.insets = new Insets(10,10,10,10);
 		final JLabel profile = new JLabel();
 		model.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent event)
-					{
-						if (model.getCurrentUser() != null) {
-							Account user = model.getCurrentUser();
-							profile.setText("<html>Username: " + user.getUsername() 
-							+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-							+ "<br>Role: " + user.getRole());
-						}
-					}
-				});
+			@Override
+			public void stateChanged(ChangeEvent event)
+			{
+				if (model.getCurrentUser() != null) {
+					Account user = model.getCurrentUser();
+					profile.setText("<html>Username: " + user.getUsername() 
+					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
+					+ "<br>Role: " + user.getRole());
+				}
+			}
+		});
 		panel.addComponent(profile, 0, 0);
 		c.weighty = 0;
 
@@ -715,7 +810,7 @@ public class View {
 		c.weighty = 0;
 		c.gridwidth = 0;
 		panel.addNavigationButton("Back", 16, "Customer", 0, 4);
-		
+
 		JButton SumbitButton = new JButton("Sumbit");
 		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
 		SumbitButton.addActionListener(new ActionListener() {
@@ -723,7 +818,7 @@ public class View {
 			public void actionPerformed(ActionEvent arg0) {
 				boolean validEntry = true;
 				String errors = "<html>The following are not valid entries:<br>";
-				
+
 				String complaintTest = complaint.getText();
 				if (complaintTest.isEmpty() || complaintTest.length() < 1)
 				{
@@ -731,7 +826,7 @@ public class View {
 					validEntry = false;
 					errors += "complaint Test has to greater than 1 character<br>";
 				}
-				
+
 				if (validEntry) {
 					panel.clearComponents();
 					if (model.addComplaint(model.getCurrentUser().getUsername(), complaintTest)) {	
@@ -744,51 +839,50 @@ public class View {
 			};
 		});
 		panel.addComponent(SumbitButton, 0, 3);
-		
-	
+
 		return panel;
 	}
-	
+
 	//Kun added
 	private JPanel getFeedbackPanel() {
-		
+
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
-	
+
 		c.weighty = 1;
 		c.insets = new Insets(10,10,10,10);
 		final JLabel profile = new JLabel();
 		model.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent event)
-					{
-						if (model.getCurrentUser() != null) {
-							Account user = model.getCurrentUser();
-							profile.setText("<html>Username: " + user.getUsername() 
-							+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-							+ "<br>Role: " + user.getRole());
-						}
-					}
-				});
+			@Override
+			public void stateChanged(ChangeEvent event)
+			{
+				if (model.getCurrentUser() != null) {
+					Account user = model.getCurrentUser();
+					profile.setText("<html>Username: " + user.getUsername() 
+					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
+					+ "<br>Role: " + user.getRole());
+				}
+			}
+		});
 		panel.addComponent(profile, 0, 0);
 		c.weighty = 0;
 
 		panel.addLabel("Feedback List:", 16, "left", null, null, 0, 1);
 		c.weighty = 1;
 		c.gridwidth = 1;
-		
+
 		final JTextArea Feedback = new JTextArea();
 		String FeedbackOutput = "";
-		
+
 		model.getFeedback();
 		if (!model.getComplaints().isEmpty()) {
 			for (int i=0; i < model.getComplaints().size(); i++) {
-				
+
 				System.out.println("Runing2");
 				//FeedbackOutput = model.getComplaint().get(i).toString() + "\n";
 				//Feedback.append(model.getComplaint().get(i).toString() + "\n");
 				//System.out.println(FeedbackOutput);
-				
+
 				FeedbackOutput += "user: " + model.getComplaints().get(i).getCustomer() + "\n"
 						+ "complaint: : " + model.getComplaints().get(i).getComplaint() + "\n"
 						+ "time: " + model.getComplaints().get(i).getTime() + "\n";
@@ -798,7 +892,7 @@ public class View {
 				catch (NullPointerException e) {
 					FeedbackOutput += "resolvedBy: " + "null" + "\n";
 				}
-				
+
 				try {
 					FeedbackOutput += "Solution: " + model.getComplaints().get(i).getSolution() + "\n";
 				}
@@ -806,7 +900,7 @@ public class View {
 					FeedbackOutput += "Solution: " + "null" + "\n";
 				}
 				FeedbackOutput += "\n";
-				
+
 			}
 			Feedback.append(FeedbackOutput);
 		}
@@ -823,7 +917,7 @@ public class View {
 
 		return panel;
 	}
-	
+
 	private GregorianCalendar isValidDateFormat(String input) {
 		try {
 			dateFormatter.setLenient(false);
