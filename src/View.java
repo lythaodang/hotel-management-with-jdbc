@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -28,6 +29,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
 
 /**
@@ -66,16 +68,16 @@ public class View {
 		cards.add(getWelcomePanel("Manager"), "Manager");
 		cards.add(getWelcomePanel("Room Service"), "Room Service");
 		cards.add(getWelcomePanel("Receptionist"), "Receptionist");
-		
+
 		// customer panels
 		cards.add(getMakeReservationPanel(), "Book");
 		cards.add(getReceiptPanel(), "Receipt");
 		cards.add(getCustViewCancelPanel(), "View/Cancel");
 		// cards.add(getCustRoomServicePanel(), "View/Order Room Service");
 		// cards.add(getGiveFeedbackPanel(), "Give Feedback");
-		
+
 		// employee panels
-		// cards.add(getReservationsPanel(), "Reservations");
+		cards.add(getReservationsPanel(), "Reservations");
 		// cards.add(getRoomServicePanel(), "Room Service");
 		// cards.add(getFeedbackPanel(), "Feedback");
 		// cards.add(getUsersPanel(), "User");
@@ -673,6 +675,7 @@ public class View {
 		DefaultCaret caret = (DefaultCaret) receipt.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		panel.addComponent(scrollPane, 0, 2);
+		panel.addComponent(receipt);
 
 		model.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -758,7 +761,10 @@ public class View {
 							JOptionPane.QUESTION_MESSAGE);
 					if (response == JOptionPane.NO_OPTION) ;
 					if (response == JOptionPane.YES_OPTION) {
-						model.cancelReservation((Reservation) list.getSelectedValue());
+						if (!model.cancelReservation((Reservation) list.getSelectedValue()))
+							JOptionPane.showMessageDialog(new JFrame(), 
+									"An unexpected error has occurred. Please contact your system admin.", "Error", 
+									JOptionPane.ERROR_MESSAGE);;
 					}
 				}
 			}
@@ -777,9 +783,129 @@ public class View {
 		return panel;
 	}
 
+	private JPanel getReservationsPanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.gridwidth = 4;
+		c.weightx = 1;
+		c.ipady = 30;
+		panel.addLabel("Reservations", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.ipady = 0;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("Enter a min and max and sort by room or customer.", 12, "left", 
+				null, null, 0, 1);
+
+		c.gridwidth = 1;
+		panel.addLabel("Min cost (optional)", 12, "left", null, null, 0, 2);
+		final JTextField minTF = new JTextField();
+		panel.addComponent(minTF, 1, 2);
+
+		panel.addLabel("Max cost (optional)", 12, "left", null, null, 2, 2);
+		final JTextField maxTF = new JTextField();
+		panel.addComponent(maxTF, 3, 2);
+
+		c.gridwidth = 2;
+		JButton roomBtn = new JButton("Order by Rooms");
+		roomBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		panel.addComponent(roomBtn, 0, 3);
+		JButton customerBtn = new JButton("Order by Customer");
+		roomBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		panel.addComponent(customerBtn, 2, 3);
+
+		c.gridwidth = 4;
+		c.weighty = 1;
+		c.insets = new Insets(10,10,10,10);
+		final JTextArea list = new JTextArea();
+		list.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(list,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		DefaultCaret caret = (DefaultCaret) list.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		panel.addComponent(scrollPane, 0, 4);
+		panel.addComponent(list);
+
+		roomBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Double min = null, max = null;
+
+				if (!minTF.getText().equals("")) 
+					min = Double.parseDouble(minTF.getText());
+				if (!maxTF.getText().equals(""))
+					max = Double.parseDouble(maxTF.getText());
+
+				ArrayList<Reservation> res = model.getReservations("roomType", min, max);
+				if (res != null)
+					list.setText(formatReservations(res));
+				else 
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+			}
+		});
+
+		customerBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Double min = null, max = null;
+
+				if (!minTF.getText().equals("")) 
+					min = Double.parseDouble(minTF.getText());
+				if (!maxTF.getText().equals(""))
+					max = Double.parseDouble(maxTF.getText());
+
+				ArrayList<Reservation> res = model.getReservations("customer", min, max);
+				if (res != null)
+					list.setText(formatReservations(res));
+				else
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+			}
+		});
+
+		model.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (model.getCurrentUser() != null) {
+					ArrayList<Reservation> res = model.getAllReservations();
+					if (res != null)
+						list.setText(formatReservations(res));
+					else 
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"An unexpected error has occurred. Please contact your system admin.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+
+			}
+		});
+
+		c.weighty = 0;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ArrayList<Reservation> res = model.getAllReservations();
+				if (res != null)
+					list.setText(formatReservations(res));
+				else 
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				view.switchPanel(model.getCurrentRole());
+			}
+		});
+		panel.addComponent(backBtn, 0, 5);
+
+		return panel;
+	}
+
 	//Kun added
 	private JPanel getGiveFeedbackPanel() {
-
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
@@ -940,5 +1066,26 @@ public class View {
 			count++;
 		}
 		return count;
+	}
+
+	private String formatReservations(ArrayList<Reservation> res) {
+		String result = "Total reservations: " + res.size();
+		if (!res.isEmpty()) {
+			for (Reservation r : res) {
+				String in = dateFormatter.format(r.getStartDate());
+				String out = dateFormatter.format(r.getEndDate());
+
+				result += "\n\nReservation # " + r.getReservationId()
+						+ "\nUsername: " + r.getCustomer()
+						+ "\nRoom: " + r.getRoom().getRoomType()
+						+ "\nStart: " + in
+						+ "\nEnd: " + out
+						+ "\nCost: " + Double.toString(r.getTotalCost());
+
+				if (r.getCanceled())
+					result += "\nThis reservation has been canceled";
+			}
+		}
+		return result;
 	}
 }

@@ -14,19 +14,23 @@ import java.util.Date;
  */
 public class Reservation {
 	private int reservationId;
+	private String username;
 	private Room room;
 	private Date startDate;
 	private Date endDate;
 	private int numOfDays;
 	private double totalCost;	
+	private boolean canceled;
 
-	public Reservation(int reservationId, Room room, Date startDate, Date endDate, int numOfDays, double totalCost) {
+	public Reservation(int reservationId, String username, Room room, Date startDate, Date endDate, int numOfDays, double totalCost) {
 		this.reservationId = reservationId;
+		this.username = username;
 		this.room = room;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.numOfDays = numOfDays;
 		this.totalCost = totalCost;
+		this.canceled = false;
 	}
 
 	public int getReservationId() {
@@ -51,6 +55,18 @@ public class Reservation {
 
 	public double getTotalCost() {
 		return totalCost;
+	}
+	
+	public String getCustomer() {
+		return username;
+	}
+	
+	public boolean getCanceled() {
+		return canceled;
+	}
+	
+	public void setCanceled() {
+		canceled = true;
 	}
 	
 	/**

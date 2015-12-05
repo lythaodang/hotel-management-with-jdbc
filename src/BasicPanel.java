@@ -12,9 +12,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
@@ -38,6 +40,7 @@ public class BasicPanel extends JPanel {
 	private ArrayList<JComboBox> cbs;
 	@SuppressWarnings("rawtypes")
 	private ArrayList<JList> ls;
+	private ArrayList<JTable> ts;
 	
 	/** 
 	 * Constructs the panel with a view manager.
@@ -51,6 +54,7 @@ public class BasicPanel extends JPanel {
 		tas = new ArrayList<JTextArea>();
 		cbs = new ArrayList<JComboBox>();
 		ls = new ArrayList<JList>();
+		ts = new ArrayList<JTable>();
 		
 		this.setLayout(new GridBagLayout());
 		c = new GridBagConstraints();
@@ -82,6 +86,8 @@ public class BasicPanel extends JPanel {
 			cbs.add((JComboBox) comp);
 		if (comp instanceof JList)
 			ls.add((JList) comp);
+		if (comp instanceof JTable)
+			ts.add((JTable) comp);
 	}
 	
 	/**
@@ -174,6 +180,8 @@ public class BasicPanel extends JPanel {
 			cb.setSelectedIndex(0);
 		for (JList l : ls) 
 			l.setListData(new Object[1]);
+		for (JTable t : ts) 
+			t.setModel(new DefaultTableModel());
 	}
 
 	public GridBagConstraints getConstraints() {

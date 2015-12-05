@@ -111,6 +111,62 @@ public class Model {
 		}
 	}
 	
+	public ArrayList<Reservation> getAllReservations() {
+		ArrayList<Reservation> resList = new ArrayList<Reservation>();
+		
+		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+				+ "from room right outer join reservation on room.roomid = reservation.roomid ";
+		try {
+			ResultSet rs = statement.executeQuery(queryRes);
+			while (rs.next()) {
+				Room room = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
+				Reservation res = new Reservation(rs.getInt("reservationid"), rs.getString("customer"), room, 
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"));
+				if (rs.getBoolean("canceled"))
+					res.setCanceled();
+				resList.add(res);
+			}
+			return resList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public ArrayList<Reservation> getReservations(String orderBy, Double min, Double max) {
+		ArrayList<Reservation> resList = new ArrayList<Reservation>();
+		
+		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+				+ "from room right outer join reservation on room.roomid = reservation.roomid";
+		
+		if (min != null) {
+			queryRes += " having totalCost >= " + min;
+			if (max != null)
+				queryRes += " and totalCost <= " + max;
+		}
+		else
+			if (max != null)
+				queryRes += " having totalCost <= " + max;
+		
+		queryRes += " order by " + orderBy;
+		
+		try {
+			ResultSet rs = statement.executeQuery(queryRes);
+			while (rs.next()) {
+				Room room = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
+				Reservation res = new Reservation(rs.getInt("reservationid"), rs.getString("customer"), room, 
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"));
+				if (rs.getBoolean("canceled"))
+					res.setCanceled();
+				resList.add(res);
+			}
+			return resList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public void setCurrentUser(String username) {
 		if (username == null) {
 			currentUser = null;
@@ -133,14 +189,14 @@ public class Model {
 			e.printStackTrace();
 		}
 
-		String queryRes = "select reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
-				+ "from room left outer join reservation on room.roomid = reservation.roomid "
+		String queryRes = "select customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+				+ "from room right outer join reservation on room.roomid = reservation.roomid "
 				+ "where customer ='" + username + "' and canceled <> true";
 		try {
 			ResultSet rs = statement.executeQuery(queryRes);
 			while (rs.next()) {
 				Room r = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
-				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), r, 
+				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), rs.getString("customer"), r, 
 						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
 				update();
 			}
@@ -148,7 +204,7 @@ public class Model {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public boolean checkUserExistence(String username) {
 		String query = "SELECT userName FROM USER";
 
