@@ -318,7 +318,6 @@ public class Model {
 	public void getFeedback() {
 
 		String query = "SELECT * FROM COMPLAINT";
-		ArrayList<String> complaintOutput = new ArrayList<String>();
 
 		try {
 			ResultSet Result = statement.executeQuery(query);
@@ -327,7 +326,6 @@ public class Model {
 						Result.getDate("time"),Result.getString("resolvedBy"),Result.getString("solution")));
 			}
 
-			System.out.println("Model Runing4");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -377,5 +375,22 @@ public class Model {
 		ChangeEvent event = new ChangeEvent(this);
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
+	}
+	
+	//Kun added 
+	public boolean updateComplaint(String customer, String ComplaintTest, String resolvedBy, String solution) {
+
+		String query = "UPDATE COMPLAINT SET COMPLAINT.RESOLVEDBY = '" + resolvedBy +
+				"' , COMPLAINT.SOLUTION = '" + solution + "' WHERE COMPLAINT.CUSTOMER = '" + customer + "'" + 
+				" AND COMPLAINT.COMPLAINT = '" + ComplaintTest + "'";
+		//System.out.println("query: " + query);
+		try {
+			statement.execute(query);
+			update();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }
