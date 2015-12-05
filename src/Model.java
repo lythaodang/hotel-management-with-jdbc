@@ -32,10 +32,10 @@ public class Model {
 	private Account currentUser;
 	private String currentRole;
 	private ArrayList<Reservation> reservations;
-	
+
 	//Kun added
 	private ArrayList<Complaint> complaints;
-	
+
 	// variables used for manager
 	private Connection connection = JDBCUtil.getConnectionByDriverManager();
 	private Statement statement = JDBCUtil.getStatement(connection);
@@ -67,7 +67,7 @@ public class Model {
 		lastName = lastName.replace("'", "''");
 		secQuestion = secQuestion.replace("'", "''");
 		secAnswer = secAnswer.replace("'", "''");
-		
+
 		String query = String.format("INSERT INTO USER(userName,password,firstName,lastName,age,gender,userRole,question,answer)"
 				+ " VALUES('%s','%s','%s','%s',%s,'%s','%s','%s', '%s')", 
 				username, password, firstName, lastName, age, gender, role, secQuestion, secAnswer);
@@ -81,10 +81,10 @@ public class Model {
 			return false;
 		}
 	}
-	
+
 	public boolean addReservation(int roomId, String checkIn, String checkOut) {
 		String query = String.format("insert into reservation(roomId, customer, startDate, endDate) values ('%s','%s',%s,%s)",
-				roomId, currentUser.getUsername(), toDateSQL(checkIn), toDateSQL(checkOut));
+				roomId, currentUser.getUsername(), sqlToDate(checkIn), sqlToDate(checkOut));
 		try {
 			statement.execute(query);
 			setCurrentUser(currentUser.getUsername());
@@ -97,14 +97,14 @@ public class Model {
 			return false;
 		}
 	}
-	
+
 	public void setCurrentUser(String username) {
 		if (username == null) {
 			currentUser = null;
 			currentRole = null;
 			return;
 		}
-		
+
 		String queryUser = "SELECT username, firstname, lastname, userrole FROM USER WHERE username = '" + username + "'";
 
 		try {
@@ -119,7 +119,7 @@ public class Model {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		String queryRes = "select reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room left outer join reservation on room.roomid = reservation.roomid "
 				+ "where customer ='" + username + "'";
@@ -134,11 +134,11 @@ public class Model {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 
-		
+
+
 	}
-	
+
 	public boolean checkUserExistence(String username) {
 		String query = "SELECT userName FROM USER";
 
@@ -199,8 +199,8 @@ public class Model {
 
 	public ArrayList<Room> getAvailRooms(String in, String out) {
 		ArrayList<Room> rooms = new ArrayList<>();
-		String checkIn = toDateSQL(in);
-		String checkOut = toDateSQL(out);
+		String checkIn = sqlToDate(in);
+		String checkOut = sqlToDate(out);
 		String query = "select * from room where roomId not in "
 				+ "(select distinct room.roomId "
 				+ "from room left outer join reservation on room.roomId = reservation.roomId "
@@ -224,64 +224,15 @@ public class Model {
 
 		return null;
 	}
-	
-	public String toDateSQL(String date) {
-		return "str_to_date('" + date + "', '%m/%d/%Y')";
-	}
-	
-	public String SQLtoDate(String date) {
-		return "str_to_date('" + date + "', '%m/%d/%Y')";
-	}
-	public String getCurrentRole() {
-		return currentRole;
-	}
 
-	public void setCurrentRole(String role) {
-		currentRole = role;
-		update();
-	}
-	
-	public Account getCurrentUser() {
-		return currentUser;
-	}
-	
-	public ArrayList<Reservation> getReservations() {
-		return reservations;
-	}
-	
-	public void clearResrvations() {
-		reservations = new ArrayList<Reservation>();
-	}
-
-	public ArrayList<Complaint> getComplaints() {
-		return complaints;
-	}
-	
-	/**
-	 * Adds the changelisteners
-	 * @param accounts the accounts to set
-	 */
-	public void addChangeListener(ChangeListener listener) {
-		listeners.add(listener);
-	}
-	
-	/**
-	 * Notifies the observers that there has been a change.
-	 */
-	private void update() {
-		ChangeEvent event = new ChangeEvent(this);
-		for (ChangeListener listener : listeners)
-			listener.stateChanged(event);
-	}
-	
 	//Kun added
 	public boolean addComplaint(String customer, String complaintTest) {	
-		
+
 		final Date time = new Date();
 		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
 		Complaint complaintObject = new Complaint(currentUser.getUsername(), complaintTest, time, 
-												"null", "null");
-		
+				"null", "null");
+
 		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
 				+ " VALUES('%s','%s')", 
 				currentUser.getUsername(), complaintTest);
@@ -296,12 +247,12 @@ public class Model {
 			return false;
 		}
 	}
-	
+
 	//Kun added
 	public void getFeedback() {
-		
+
 		String query = "SELECT * FROM COMPLAINT";
-		ArrayList<String> ComplaintOutput = new ArrayList<String>();
+		ArrayList<String> complaintOutput = new ArrayList<String>();
 
 		try {
 			ResultSet Result = statement.executeQuery(query);
@@ -316,6 +267,49 @@ public class Model {
 		}
 		update();
 	}
-	
 
+	public String sqlToDate(String date) {
+		return "str_to_date('" + date + "', '%m/%d/%Y')";
+	}
+	public String getCurrentRole() {
+		return currentRole;
+	}
+
+	public void setCurrentRole(String role) {
+		currentRole = role;
+		update();
+	}
+
+	public Account getCurrentUser() {
+		return currentUser;
+	}
+
+	public ArrayList<Reservation> getReservations() {
+		return reservations;
+	}
+
+	public void clearResrvations() {
+		reservations = new ArrayList<Reservation>();
+	}
+
+	public ArrayList<Complaint> getComplaints() {
+		return complaints;
+	}
+
+	/**
+	 * Adds the changelisteners
+	 * @param accounts the accounts to set
+	 */
+	public void addChangeListener(ChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	/**
+	 * Notifies the observers that there has been a change.
+	 */
+	private void update() {
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener listener : listeners)
+			listener.stateChanged(event);
+	}
 }

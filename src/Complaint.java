@@ -1,13 +1,7 @@
-//Kun added
-
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 
-
-
 /**
- * COPYRIGHT 2015 TupleMeOver. All lefts Reserved. 
+ * COPYRIGHT 2015 TupleMeOver. All Rights Reserved. 
  * Hotel Management 
  * CS157A Group Project
  * @author Kun Su, Ly Dang, Lynn Longboy
@@ -17,8 +11,7 @@ import java.util.Date;
 /**
  * A user's Complaint.
  */
-@SuppressWarnings("serial")
-public class Complaint implements Serializable {
+public class Complaint {
 
 	private final String customer;
 	private final String complaint;
@@ -55,5 +48,4 @@ public class Complaint implements Serializable {
 	public String getSolution() {
 		return solution;
 	}
-	
 }

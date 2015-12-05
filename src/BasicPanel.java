@@ -64,7 +64,6 @@ public class BasicPanel extends JPanel {
 	 * @param x the x location
 	 * @param y the y location
 	 */
-	@SuppressWarnings("rawtypes")
 	public void addComponent(JComponent comp, int x, int y) {
 		c.gridx = x;
 		c.gridy = y;
@@ -73,6 +72,7 @@ public class BasicPanel extends JPanel {
 		addComponent(comp);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void addComponent(JComponent comp) {
 		if (comp instanceof JTextField)
 			tfs.add((JTextField) comp);
@@ -164,7 +164,7 @@ public class BasicPanel extends JPanel {
 	/**
 	 * Clears all textfields and textareas on the panel.
 	 */
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void clearComponents() {
 		for (JTextField tf : tfs)
 			tf.setText("");
