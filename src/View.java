@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -20,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -71,7 +73,7 @@ public class View {
 
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
-		cards.add(getVieworCancelPanel(), "View/Cancel");
+		cards.add(getFeedbackPanel(), "Feedback");
 		
 		
 		
@@ -758,9 +760,7 @@ public class View {
 				
 				if (validEntry) {
 					panel.clearComponents();
-					if (model.addComplaint(complaintTest, model.getCurrentUser())) {	
-						
-						model.setCurrentUser(model.getCurrentUser().getUsername());
+					if (model.addComplaint(model.getCurrentUser().getUsername(), complaintTest)) {	
 						JOptionPane.showMessageDialog(new JFrame(), "Successful!", "Result", JOptionPane.DEFAULT_OPTION);
 						view.switchPanel(model.getCurrentRole());
 					}
@@ -776,7 +776,7 @@ public class View {
 	}
 	
 	//Kun added
-	private JPanel getVieworCancelPanel() {
+	private JPanel getFeedbackPanel() {
 		
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -799,48 +799,54 @@ public class View {
 		panel.addComponent(profile, 0, 0);
 		c.weighty = 0;
 
-		panel.addLabel("complaint", 16, "left", null, null, 0, 1);
+		panel.addLabel("Feedback List:", 16, "left", null, null, 0, 1);
 		c.weighty = 1;
 		c.gridwidth = 1;
-		final JTextField complaint = new JTextField();
-		panel.addComponent(complaint, 0, 2);
+		
+		final JTextArea Feedback = new JTextArea();
+		String FeedbackOutput = "";
+		
+		model.getFeedback();
+		if (!model.getComplaints().isEmpty()) {
+			for (int i=0; i < model.getComplaints().size(); i++) {
+				
+				System.out.println("Runing2");
+				//FeedbackOutput = model.getComplaint().get(i).toString() + "\n";
+				//Feedback.append(model.getComplaint().get(i).toString() + "\n");
+				//System.out.println(FeedbackOutput);
+				
+				FeedbackOutput += "user: " + model.getComplaints().get(i).getCustomer() + "\n"
+						+ "complaint: : " + model.getComplaints().get(i).getComplaint() + "\n"
+						+ "time: " + model.getComplaints().get(i).getTime() + "\n";
+				try {
+					FeedbackOutput += "resolvedBy: " + model.getComplaints().get(i).getResolvedBy() + "\n";
+				}
+				catch (NullPointerException e) {
+					FeedbackOutput += "resolvedBy: " + "null" + "\n";
+				}
+				
+				try {
+					FeedbackOutput += "Solution: " + model.getComplaints().get(i).getSolution() + "\n";
+				}
+				catch (NullPointerException e) {
+					FeedbackOutput += "Solution: " + "null" + "\n";
+				}
+				FeedbackOutput += "\n";
+				
+			}
+			Feedback.append(FeedbackOutput);
+		}
+		else {
+			Feedback.append("Complaint List is empty \n");
+		}
+
+		JScrollPane ScrollBar = new JScrollPane(Feedback,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		panel.addComponent(ScrollBar, 0, 3);
 
 		c.weighty = 0;
 		c.gridwidth = 0;
-		panel.addNavigationButton("Back", 16, "Customer", 0, 4);
-		
-		JButton SumbitButton = new JButton("Sumbit");
-		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
-		SumbitButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				boolean validEntry = true;
-				String errors = "<html>The following are not valid entries:<br>";
-				
-				String complaintTest = complaint.getText();
-				if (complaintTest.isEmpty() || complaintTest.length() < 1)
-				{
-					complaint.setText("");
-					validEntry = false;
-					errors += "complaint Test has to greater than 1 character<br>";
-				}
-				
-				if (validEntry) {
-					panel.clearComponents();
-					if (model.addComplaint(complaintTest, model.getCurrentUser())) {	
-						
-						model.setCurrentUser(model.getCurrentUser().getUsername());
-						JOptionPane.showMessageDialog(new JFrame(), "Successful!", "Result", JOptionPane.DEFAULT_OPTION);
-						view.switchPanel(model.getCurrentRole());
-					}
-				}
-				else
-					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
-			};
-		});
-		panel.addComponent(SumbitButton, 0, 3);
-		
-	
+		panel.addNavigationButton("Back", 16, "Manager", 0, 5);
+
 		return panel;
 	}
 }
