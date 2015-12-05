@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -249,5 +250,29 @@ public class Model {
 		ChangeEvent event = new ChangeEvent(this);
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
+	}
+	
+	//Kun added
+	/**
+	 * Add an account to the database.
+	 * @param account the account to add
+	 */
+	public boolean addComplaint(String complaintTest, Account user) {	
+		
+		final GregorianCalendar time = new GregorianCalendar();
+		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
+		complaintTest = complaintTest.replace("'", "''");
+		
+		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
+				+ " VALUES('%s','%s')", 
+				user.getUsername(), complaintTest);
+
+		try {
+			statement.execute(query);
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }
