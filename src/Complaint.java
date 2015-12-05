@@ -2,7 +2,8 @@
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
+import java.util.Date;
+
 
 
 /**
@@ -19,28 +20,31 @@ import java.util.GregorianCalendar;
 @SuppressWarnings("serial")
 public class Complaint implements Serializable {
 
-	private final Account user;
+	private final String customer;
 	private final String complaint;
-	private final GregorianCalendar time;
+	private final Date time;
 	private final String resolvedBy;
 	private final String solution;
 
-	public Complaint(String complaint, GregorianCalendar time, String resolvedBy,
-					 String solution, Account user) {
+	public Complaint(String customer, String complaint, Date time, 
+					String resolvedBy, String solution) {
 
+		this.customer = customer;
 		this.complaint = complaint;
 		this.time = time;
 		this.resolvedBy = resolvedBy;
 		this.solution = solution;
-		this.user = user;
 	}
 
-
+	public String getCustomer() {
+		return customer;
+	}
+	
 	public String getComplaint() {
 		return complaint;
 	}
 	
-	public GregorianCalendar getTime() {
+	public Date getTime() {
 		return time;
 	}
 	
@@ -52,8 +56,4 @@ public class Complaint implements Serializable {
 		return solution;
 	}
 	
-	public Account getUser() {
-		return user;
-	}
-
 }

@@ -5,6 +5,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.swing.event.ChangeEvent;
@@ -222,6 +223,9 @@ public class Model {
 		return "str_to_date('" + date + "', '%m/%d/%Y')";
 	}
 	
+	public String SQLtoDate(String date) {
+		return "str_to_date('" + date + "', '%m/%d/%Y')";
+	}
 	public String getCurrentRole() {
 		return currentRole;
 	}
@@ -237,11 +241,6 @@ public class Model {
 	
 	public ArrayList<Reservation> getReservations() {
 		return reservations;
-	}
-
-	//Kun added
-	public ArrayList<Complaint> getComplaint() {
-		return complaint;
 	}
 	
 	/**
@@ -262,19 +261,21 @@ public class Model {
 	}
 	
 	//Kun added
-	/**
-	 * Add an account to the database.
-	 * @param account the account to add
-	 */
-	public boolean addComplaint(String complaintTest, Account user) {	
+	public ArrayList<Complaint> getComplaint() {
+		return complaint;
+	}
+	
+	//Kun added
+	public boolean addComplaint(String customer, String complaintTest) {	
 		
-		final GregorianCalendar time = new GregorianCalendar();
+		final Date time = new Date();
 		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
-		Complaint complaintObject = new Complaint(complaintTest, time, "", "", user);
+		Complaint complaintObject = new Complaint(currentUser.getUsername(), complaintTest, time, 
+												"null", "null");
 		
 		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
 				+ " VALUES('%s','%s')", 
-				user.getUsername(), complaintTest);
+				currentUser.getUsername(), complaintTest);
 
 		try {
 			statement.execute(query);
@@ -287,4 +288,25 @@ public class Model {
 		}
 	}
 	
+	//Kun added
+	public void getFeedback() {
+		
+		String query = "SELECT * FROM COMPLAINT";
+		ArrayList<String> ComplaintOutput = new ArrayList<String>();
+
+		try {
+			ResultSet Result = statement.executeQuery(query);
+			while (Result.next()) {
+				complaint.add(new Complaint(Result.getString("customer"),Result.getString("complaint"),
+						Result.getDate("time"),Result.getString("resolvedBy"),Result.getString("solution")));
+			}
+
+			System.out.println("Model Runing4");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		update();
+	}
+	
+
 }
