@@ -110,10 +110,10 @@ public class Model {
 			return false;
 		}
 	}
-	
+
 	public ArrayList<Reservation> getAllReservations() {
 		ArrayList<Reservation> resList = new ArrayList<Reservation>();
-		
+
 		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room right outer join reservation on room.roomid = reservation.roomid ";
 		try {
@@ -121,24 +121,24 @@ public class Model {
 			while (rs.next()) {
 				Room room = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
 				Reservation res = new Reservation(rs.getInt("reservationid"), rs.getString("customer"), room, 
-						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"));
-				if (rs.getBoolean("canceled"))
-					res.setCanceled();
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"),
+						rs.getBoolean("canceled"));
 				resList.add(res);
 			}
+			rs.close();
 			return resList;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	public ArrayList<Reservation> getReservations(String orderBy, Double min, Double max) {
 		ArrayList<Reservation> resList = new ArrayList<Reservation>();
-		
+
 		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room right outer join reservation on room.roomid = reservation.roomid";
-		
+
 		if (min != null) {
 			queryRes += " having totalCost >= " + min;
 			if (max != null)
@@ -147,64 +147,100 @@ public class Model {
 		else
 			if (max != null)
 				queryRes += " having totalCost <= " + max;
-		
+
 		queryRes += " order by " + orderBy;
-		
+
 		try {
 			ResultSet rs = statement.executeQuery(queryRes);
 			while (rs.next()) {
 				Room room = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
 				Reservation res = new Reservation(rs.getInt("reservationid"), rs.getString("customer"), room, 
-						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"));
-				if (rs.getBoolean("canceled"))
-					res.setCanceled();
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"),
+						rs.getBoolean("canceled"));
 				resList.add(res);
 			}
+			rs.close();
 			return resList;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	public void setCurrentUser(String username) {
 		if (username == null) {
 			currentUser = null;
 			currentRole = null;
-			return;
 		}
-
-		String queryUser = "SELECT username, firstname, lastname, userrole FROM USER WHERE username = '" + username + "'";
-
-		try {
-			String role;
-
-			ResultSet rs = statement.executeQuery(queryUser);
-			if (rs.next()) {
-				setCurrentRole(role = rs.getString("userrole"));
-				currentUser = new Account(rs.getString("firstname"), rs.getString("lastname"), rs.getString("username"), role);
-				update();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		else {
+			currentUser = getAccount(username);
+			currentRole = currentUser.getRole();
 		}
+		update();
+	}
 
-		String queryRes = "select customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+	public Account getAccount(String username) {
+		Account acc = null;
+		String queryAccount = "SELECT firstname, lastname, username, userrole "
+				+ "FROM USER WHERE username = '" + username + "'"; 
+		String queryRes = "select customer, canceled, reservationId, room.roomId, "
+				+ "startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room right outer join reservation on room.roomid = reservation.roomid "
-				+ "where customer ='" + username + "' and canceled <> true";
+				+ "where customer ='" + username + "'";
 		try {
-			ResultSet rs = statement.executeQuery(queryRes);
+			ResultSet rs = statement.executeQuery(queryAccount);
+			while (rs.next()) {
+				acc = new Account(rs.getString("firstname"), rs.getString("lastname"), 
+						rs.getString("username"), rs.getString("userrole"));
+			}
+			rs.close();
+			rs = statement.executeQuery(queryRes);
 			while (rs.next()) {
 				Room r = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
-				currentUser.getReservations().add(new Reservation(rs.getInt("reservationid"), rs.getString("customer"), r, 
-						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost")));
-				update();
+				acc.getReservations().add(new Reservation(rs.getInt("reservationid"), rs.getString("customer"), r, 
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"), 
+						rs.getBoolean("canceled")));
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return null;
 		}
+		
+		return acc;
 	}
+
+	public ArrayList<Account> getUsers(Integer numOfReservations) {
+		ArrayList<Account> list = new ArrayList<Account>();
+		String queryUser = "";
+		ArrayList<String> usernames = new ArrayList<String>();
 	
+		if (numOfReservations == null)
+			queryUser = "SELECT username from user";
+		else
+			queryUser = "select username FROM USER right outer join "
+					+ "(select customer, reservationId, room.roomId, startDate, "
+					+ "endDate, numOfDays, totalCost, costpernight, roomtype "
+					+ "from room right outer join reservation on room.roomid = reservation.roomid "
+					+ "group by customer having count(*) >= " + numOfReservations + ") as reservations "
+					+ "on user.username = reservations.customer";
+
+		try {
+			ResultSet rs = statement.executeQuery(queryUser);
+			while (rs.next()) 
+				usernames.add(rs.getString("username"));
+			rs.close();
+			
+			for (String s : usernames) 
+				list.add(getAccount(s));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return list;
+	}
+
 	public boolean checkUserExistence(String username) {
 		String query = "SELECT userName FROM USER";
 
@@ -213,6 +249,7 @@ public class Model {
 			while (rs.next()) {
 				if (rs.getString("username").equals(username)) return true;
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -225,7 +262,10 @@ public class Model {
 
 		try {
 			ResultSet rs = statement.executeQuery(query);
-			if (rs.next() && rs.getString("password").equals(password)) return true;
+			if (rs.next() && rs.getString("password").equals(password)) {
+				rs.close();
+				return true;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -241,6 +281,7 @@ public class Model {
 			if (rs.next()) {
 				return rs.getString("question");
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -256,6 +297,7 @@ public class Model {
 			if (rs.next() && rs.getString("answer").equals(answer)) {
 				return rs.getString("password");
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -283,6 +325,7 @@ public class Model {
 			while (rs.next()) {
 				rooms.add(new Room(rs.getInt("roomid"), rs.getDouble("costpernight"), rs.getString("roomtype")));
 			}
+			rs.close();
 			return rooms;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -321,12 +364,13 @@ public class Model {
 		ArrayList<String> complaintOutput = new ArrayList<String>();
 
 		try {
-			ResultSet Result = statement.executeQuery(query);
-			while (Result.next()) {
-				complaints.add(new Complaint(Result.getString("customer"),Result.getString("complaint"),
-						Result.getDate("time"),Result.getString("resolvedBy"),Result.getString("solution")));
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				complaints.add(new Complaint(rs.getString("customer"),rs.getString("complaint"),
+						rs.getDate("time"),rs.getString("resolvedBy"),rs.getString("solution")));
 			}
-
+			
+			rs.close();
 			System.out.println("Model Runing4");
 		} catch (SQLException e) {
 			e.printStackTrace();

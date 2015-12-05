@@ -22,7 +22,7 @@ public class Reservation {
 	private double totalCost;	
 	private boolean canceled;
 
-	public Reservation(int reservationId, String username, Room room, Date startDate, Date endDate, int numOfDays, double totalCost) {
+	public Reservation(int reservationId, String username, Room room, Date startDate, Date endDate, int numOfDays, double totalCost, boolean canceled) {
 		this.reservationId = reservationId;
 		this.username = username;
 		this.room = room;
@@ -30,7 +30,7 @@ public class Reservation {
 		this.endDate = endDate;
 		this.numOfDays = numOfDays;
 		this.totalCost = totalCost;
-		this.canceled = false;
+		this.canceled = canceled;
 	}
 
 	public int getReservationId() {
@@ -63,10 +63,6 @@ public class Reservation {
 	
 	public boolean getCanceled() {
 		return canceled;
-	}
-	
-	public void setCanceled() {
-		canceled = true;
 	}
 	
 	/**

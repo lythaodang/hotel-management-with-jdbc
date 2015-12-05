@@ -21,7 +21,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -29,7 +28,6 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
 
 /**
@@ -73,23 +71,22 @@ public class View {
 		cards.add(getMakeReservationPanel(), "Book");
 		cards.add(getReceiptPanel(), "Receipt");
 		cards.add(getCustViewCancelPanel(), "View/Cancel");
-		// cards.add(getCustRoomServicePanel(), "View/Order Room Service");
+		// cards.add(getCustRoomServicePanel(), "View/Order");
 		// cards.add(getGiveFeedbackPanel(), "Give Feedback");
 
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
 		// cards.add(getRoomServicePanel(), "Room Service");
 		// cards.add(getFeedbackPanel(), "Feedback");
-		// cards.add(getUsersPanel(), "User");
 		// cards.add(getStatisticsPanel(), "Statistics");
 		// cards.add(getArchivePanel(), "Archive");
-		// cards.add(getCustomersPanel(), "Customers");
+		cards.add(getUsersPanel(), "Users");
 		// cards.add(getCheckOutPanel(), "Check out");
 
 		//Kun added
 		cards.add(getGiveFeedbackPanel(), "Give Feedback");
 		cards.add(getFeedbackPanel(), "Feedback");
-		
+
 		cards.add(getViewRoomServicePanel(), "View Room Service");
 
 
@@ -503,21 +500,14 @@ public class View {
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
 			panel.addNavigationButton("View/Cancel Reservations", 16, "View/Cancel", 0, 2);
-			c.gridwidth = 1;
-			panel.addNavigationButton("View Room Service", 16, "View Room Service", 1, 3);
-			panel.addNavigationButton("Order Room Service", 16, "Order Room Service", 0, 3);
-			c.gridwidth = 2;
+			panel.addNavigationButton("View/Order Room Service", 16, "View/Order", 0, 3);
 			panel.addNavigationButton("Give Feedback", 16, "Give Feedback", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
 			panel.addNavigationButton("Tasks", 16, "Room Service", 0, 1);
-			panel.addNavigationButton("Customers", 16, "Customers", 0, 1);
 		}
 		else {
-			panel.addNavigationButton("Reservations", 16, "Reservations", 0, 1);
-			panel.addNavigationButton("Room Service", 16, "Room Service", 0, 2);
-			panel.addNavigationButton("Customers", 16, "Customers", 0, 3);
-			panel.addNavigationButton("Check Out", 16, "Check out", 0, 4);
+			panel.addNavigationButton("Check Out", 16, "Check out", 0, 3);
 		}
 
 		return panel;
@@ -836,18 +826,26 @@ public class View {
 			public void actionPerformed(ActionEvent e) {
 				Double min = null, max = null;
 
-				if (!minTF.getText().equals("")) 
-					min = Double.parseDouble(minTF.getText());
-				if (!maxTF.getText().equals(""))
-					max = Double.parseDouble(maxTF.getText());
+				try {
+					if (!minTF.getText().equals("")) 
+						min = Double.parseDouble(minTF.getText());
+					if (!maxTF.getText().equals(""))
+						max = Double.parseDouble(maxTF.getText());
 
-				ArrayList<Reservation> res = model.getReservations("roomType", min, max);
-				if (res != null)
-					list.setText(formatReservations(res));
-				else 
+					ArrayList<Reservation> res = model.getReservations("roomType", min, max);
+					if (res != null)
+						list.setText(formatReservations(res));
+					else 
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"An unexpected error has occurred. Please contact your system admin.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+				catch (Exception e1) {
+					e1.printStackTrace();
 					JOptionPane.showMessageDialog(new JFrame(), 
-							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							"Error: Invalid input(s).", "Error", 
 							JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		});
 
@@ -886,6 +884,81 @@ public class View {
 		return panel;
 	}
 
+	private JPanel getUsersPanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.gridwidth = 2;
+		c.ipady = 30;
+		panel.addLabel("Users", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.ipady = 0;
+		c.insets = new Insets(10,10,10,10);
+		//panel.addLabel("To view all users do not enter a min #.", 12, "left", null, null, 0, 1);
+		
+		c.gridwidth = 1;
+		panel.addLabel("Min # of Reservations (Only customers)", 12, "left", null, null, 0, 2);
+		final JTextField numRes = new JTextField();
+		panel.addComponent(numRes, 1, 2);
+
+		c.gridwidth = 2;
+		c.weighty = 0;
+		JButton searchBtn = new JButton("Search for customers");
+		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		panel.addComponent(searchBtn, 0, 3);
+	
+		c.weighty = 1;
+		final JTextArea list = new JTextArea();
+		list.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(list,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		DefaultCaret caret = (DefaultCaret) list.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+		panel.addComponent(scrollPane, 0, 4);
+		panel.addComponent(list);
+		
+		searchBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Integer num = null;
+
+				try {
+					if (!numRes.getText().equals(""))
+						num = Integer.parseInt(numRes.getText());
+
+					ArrayList<Account> users = model.getUsers(num);
+					if (users != null)
+						list.setText(formatUsers(users));
+					else 
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"An unexpected error has occurred. Please contact your system admin.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+				}
+				catch (Exception e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"Error: Invalid input(s).", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+
+		c.weighty = 0;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				panel.clearComponents();
+				view.switchPanel(model.getCurrentRole());
+			}
+		});
+		panel.addComponent(backBtn, 0, 5);
+
+		return panel;
+	}
+
 	/**
 	 * Get view of room service requested by Customer
 	 * @return panel
@@ -895,24 +968,24 @@ public class View {
 		GridBagConstraints c = panel.getConstraints();
 		c.weightx = 1;
 		c.weighty = 0;
-		
+
 		/** need to retrieve info from database **/
 		String userID = "USERID";
 		String roomID= "ROOMID";
 		String task = "TASK";
-		
+
 		panel.addLabel("View of Room Service (CUSTOMER)", 16, "center", null, null, 0, 0);
 		panel.addLabel("UserID:  " + userID, 16, "left", null, null, 0, 1);
-		
+
 		panel.addLabel("RoomID:  " + roomID, 16, "left", null, null, 0, 2);
 		panel.addLabel("Task: "  + task, 16, "left", null, null, 0, 3);
-		
+
 		panel.addNavigationButton("CHANGE", 16, "Room Service", 0, 6);
 		panel.addNavigationButton("BACK", 16, "Customer", 1, 6);
 		panel.addNavigationButton("CANCEL", 16,"Customer", 2,6);
 		return panel;
 	}
-	
+
 	//Kun added
 	private JPanel getGiveFeedbackPanel() {
 		final BasicPanel panel = new BasicPanel(this);
@@ -1085,14 +1158,32 @@ public class View {
 				String out = dateFormatter.format(r.getEndDate());
 
 				result += "\n\nReservation # " + r.getReservationId()
-						+ "\nUsername: " + r.getCustomer()
-						+ "\nRoom: " + r.getRoom().getRoomType()
-						+ "\nStart: " + in
-						+ "\nEnd: " + out
-						+ "\nCost: " + Double.toString(r.getTotalCost());
+				+ "\nUsername: " + r.getCustomer()
+				+ "\nRoom: " + r.getRoom().getRoomType()
+				+ "\nStart: " + in
+				+ "\nEnd: " + out
+				+ "\nCost: $" + Double.toString(r.getTotalCost());
 
 				if (r.getCanceled())
 					result += "\nThis reservation has been canceled";
+			}
+		}
+		return result;
+	}
+	
+	private String formatUsers(ArrayList<Account> users) {
+		String result = "Total users: " + users.size();
+		if (!users.isEmpty()) {
+			for (Account a : users) {
+				result += "\n\nUsername: " + a.getUsername()
+				+ "\nName: " + a.getFirstName() + " " + a.getLastName()
+				+ "\nUser role: " + a.getRole();
+				if (a.getRole().equals("Customer")) {
+					int count = 0;
+					for (Reservation r : a.getReservations())
+						if (!r.getCanceled()) count++;
+					result += "\nNumber of Reservations: " + count;
+				}
 			}
 		}
 		return result;
