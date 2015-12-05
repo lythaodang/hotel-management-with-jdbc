@@ -32,7 +32,10 @@ public class Model {
 	private Account currentUser;
 	private String currentRole;
 	private ArrayList<Reservation> reservations;
-
+	
+	//Kun added
+	private ArrayList<Complaint> complaint;
+	
 	// variables used for manager
 	private Connection connection = JDBCUtil.getConnectionByDriverManager();
 	private Statement statement = JDBCUtil.getStatement(connection);
@@ -50,6 +53,7 @@ public class Model {
 		currentUser = null;
 		currentRole = null;
 		reservations = new ArrayList<Reservation>();
+		complaint = new ArrayList<Complaint>();
 	}
 
 	/**
@@ -235,6 +239,11 @@ public class Model {
 		return reservations;
 	}
 
+	//Kun added
+	public ArrayList<Complaint> getComplaint() {
+		return complaint;
+	}
+	
 	/**
 	 * Adds the changelisteners
 	 * @param accounts the accounts to set
@@ -261,7 +270,7 @@ public class Model {
 		
 		final GregorianCalendar time = new GregorianCalendar();
 		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
-		complaintTest = complaintTest.replace("'", "''");
+		Complaint complaintObject = new Complaint(complaintTest, time, "", "", user);
 		
 		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
 				+ " VALUES('%s','%s')", 
@@ -269,10 +278,13 @@ public class Model {
 
 		try {
 			statement.execute(query);
+			complaint.add(complaintObject);
+			System.out.println("complaint: " + complaint.size());
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
+	
 }
