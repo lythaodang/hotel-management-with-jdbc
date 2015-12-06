@@ -1,0 +1,7 @@
+complaintId	customer	complaint	time	resolvedBy	solution	updatedOn
+1	kunsuC	"This is the first complaint"	"2015-12-04 21:47:37"	kunsuM	solution	"2015-12-05 15:26:22"
+2	kunsuC	"This is my second complaint"	"2015-12-04 21:51:37"	NULL	NULL	"0000-00-00 00:00:00"
+3	kunsuC	"This is my Third complaint"	"2015-12-04 21:53:51"	NULL	NULL	"0000-00-00 00:00:00"
+4	kunsuC	"this is the last complaint before update"	"2015-12-04 22:17:28"	kunsuM	qweqrwq	"2015-12-05 20:58:20"
+21	kunsuC	"this is a complaint for testing SQL"	"2015-12-05 20:48:41"	NULL	NULL	"0000-00-00 00:00:00"
+22	kunsuC	1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234s	"2015-12-05 20:49:29"	kunsuM	1	"2015-12-05 20:57:03"

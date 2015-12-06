@@ -1,0 +1,11 @@
+username	password	firstName	lastName	age	gender	userRole	question	answer
+cust1id	cust1pwd	cust1_fn	cust1_ln	28	F	Customer	"What was my high school mascot?"	falcon
+cust2id	cust2pwd	cust2_fn	cust2_ln	50	M	Customer	"What is my mother's maiden name?"	jones
+kunsuC	12345678	kun	su	24	M	Customer	"what is my first name?"	Kun
+kunsuM	12345678	Kun	Su	24	M	Manager	0000000000	000000
+kunsuM2	12345678	kun	su	18	D	Manager	qqqqqqqqqqqqqqqq	qqqqqqqqqqqqq
+kunsuR	12345678	kun	su	18	M	Receptionist	qqqqqqqqqqqqqq	qqqqq
+kunsuS	12345678	kun	su	18	M	"Room Service"	qqqqqqqqqqqqq	qqqqqq
+manager	managerpwd	manager_fn	manager_ln	18	M	Manager	"Favorite city"	Paris
+receptionist	receptionistpwd	receptionist_fn	receptionist_ln	65	F	Receptionist	"First pet's name"	Yuki
+roomservice	roomservicepwd	roomservice_fn	roomservice_ln	50	M	"Room Service"	"First job"	receptionist
