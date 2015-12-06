@@ -252,9 +252,9 @@ SELECT * FROM user;
 
 
 LOAD DATA LOCAL INFILE 'complaint.txt' INTO TABLE complaint;
-LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\reservation.txt' INTO TABLE reservation;
-LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\room.txt' INTO TABLE room;
-LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\user.txt' INTO TABLE user;
+LOAD DATA LOCAL INFILE 'reservation.txt' INTO TABLE reservation;
+LOAD DATA LOCAL INFILE 'room.txt' INTO TABLE room;
+LOAD DATA LOCAL INFILE 'user.txt' INTO TABLE user;
 
 SELECT * FROM complaint;
 SELECT * FROM reservation;
