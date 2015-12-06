@@ -470,23 +470,35 @@ public class Model {
 			return false;
 		}
 	}
-	/*
+	
 	public ArrayList<RoomService> getRoomService() {
 		String query = "select * from roomservice where now() + interval 20 day between startdate and enddate";
 		ArrayList<RoomService> roomservice = new ArrayList<RoomService>();
 		try {
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
-				if (rs.getString("resolved")))
-				roomservice.add(new RoomService(rs.getString("task"), rs.getString(columnIndex), roomID, completedBy, reservationID, time, cost))
+				if (rs.getString("completedBy") != null)
+					roomservice.add(new RoomService(rs.getInt("taskId"), rs.getString("task"), rs.getInt("roomid"), rs.getDate("time")));
 			}
+			return roomservice;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public boolean resolveTask() {
+		String query = "update roomservice set compeltedby = '" + currentUser.getUsername() + "'";
+		try {
+			statement.execute(query);
+			update();
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
-	*/
+	
 	public boolean archive(String date) {
 		return false;
 	}

@@ -77,7 +77,7 @@ public class View {
 
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
-		// cards.add(getRoomServicePanel(), "Room Service");
+		cards.add(getRoomServicePanel(), "Room Service");
 		cards.add(getStatisticsPanel(), "Statistics");
 		cards.add(getArchivePanel(), "Archive");
 		cards.add(getUsersPanel(), "Users");
@@ -86,7 +86,6 @@ public class View {
 		cards.add(getComplaintsPanel(), "Complaints");		
 		cards.add(getViewRoomServicePanel(), "View Room Service");
 
-		
 		frame.add(cards); // add the panel with card layout to the frame
 
 		// below are the frame's characteristics
@@ -1190,7 +1189,6 @@ public class View {
 		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		panel.addComponent(submitBtn, 1, 6);
 
-		c.gridx = 1;
 		JButton backBtn = new JButton("Back to main menu");
 		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 		backBtn.addActionListener(new ActionListener() {
@@ -1271,7 +1269,7 @@ public class View {
 
 		return panel;
 	}
-	/*
+	
 	private JPanel getRoomServicePanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -1284,105 +1282,61 @@ public class View {
 		c.ipady = 0;
 		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
-		panel.addLabel("Enter a complaint ID and solution to resolve the complaint.", 12, "left", null, null, 1, 1);
+		panel.addLabel("Select a task", 12, "left", null, null, 1, 1);
 
-		panel.addLabel("Complaint ID: ", 12, "left", null, null, 1, 2);
-		panel.addLabel("Solution (Between 1 and 100 chars):", 12, "left", null, null, 1, 4);
-
-		final JTextField idTF = new JTextField();
-		panel.addComponent(idTF, 1, 3);
-
-		final JTextArea solTA = new JTextArea();
-		solTA.setWrapStyleWord(true);
-        solTA.setLineWrap(true);
-		panel.addComponent(solTA, 1, 5);
-
-		JButton submitBtn = new JButton("Resolve Complaint");
-		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
-		panel.addComponent(submitBtn, 1, 6);
-
-		c.gridx = 1;
-		JButton backBtn = new JButton("Back to main menu");
-		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
-		backBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				view.switchPanel(model.getCurrentRole());
-			}
-		});
-		panel.addComponent(backBtn, 0, 6);
-		
-		c.gridheight = 5;
-		final JTextArea list = new JTextArea();
-		list.setWrapStyleWord(true);
-        list.setLineWrap(true);
-		list.setEditable(false);
-		panel.addComponent(list);
+		@SuppressWarnings("rawtypes")
+		final JList list = new JList();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
 		JScrollPane listScroller = new JScrollPane(list);
-		panel.addComponent(listScroller, 0, 1);
+		c.weighty = 1;
+		panel.addComponent(listScroller, 0, 2);
+		panel.addComponent(list);
 
 		model.addChangeListener(new ChangeListener() {
+			@SuppressWarnings("unchecked")
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				String output = "";
-				ArrayList<Complaint> complaints = model.getComplaints();
-				if (complaints != null){
-					output += "Number of complaints: " + complaints.size();
-					for (Complaint c : complaints)
-						output += "\n\n" + c.toString();
-					list.setText(output);
-				}
+				ArrayList<RoomService> current = model.getRoomService();
+				if (current != null) 
+					list.setListData(current.toArray());
 				else {
+					list.setListData(new RoomService[0]);
 					JOptionPane.showMessageDialog(new JFrame(), 
 							"An unexpected error has occurred. Please contact your system admin.", "Error", 
 							JOptionPane.ERROR_MESSAGE);
 				}
-			};
+			}
 		});
 
+		JButton submitBtn = new JButton("Complete");
+		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		submitBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				Integer id = null;
-				String solution = solTA.getText();
-
-				try {
-					if (!idTF.getText().equals(""))
-						id = Integer.parseInt(idTF.getText());
-
-					Complaint c = model.getComplaint(id);
-					if (c == null)
-						JOptionPane.showMessageDialog(new JFrame(), 
-								"Error: Complaint does not exist.", "Error", 
-								JOptionPane.ERROR_MESSAGE);
-					else if (solution.length() < 1 || solution.length() > 100)
-						JOptionPane.showMessageDialog(new JFrame(), 
-								"Error: Solution must be between 1 and 100 characters.", "Error", 
-								JOptionPane.ERROR_MESSAGE);
-					else {
-						if (c.getResolvedBy() == null) {
-							panel.clearComponents();
-							model.updateComplaint(id, model.getCurrentUser().getUsername(), solution);
-							JOptionPane.showMessageDialog(new JFrame(), "Complaint resolved", "Result", JOptionPane.DEFAULT_OPTION);
-						}
-						else {
+				if (!list.isSelectionEmpty()) {
+					int response = JOptionPane.showConfirmDialog(new JFrame(),
+							"Are you sure you want to complete this task?",
+							"Confirmation", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.NO_OPTION) ;
+					if (response == JOptionPane.YES_OPTION) {
+						if (!model.resolveTask())
 							JOptionPane.showMessageDialog(new JFrame(), 
-									"Error: The complaint has already been resolved.", "Error", 
+									"An unexpected error has occurred. Please contact your system admin.", "Error", 
 									JOptionPane.ERROR_MESSAGE);
-						}
 					}
-				}
-				catch (Exception e1) {
-					e1.printStackTrace();
-					JOptionPane.showMessageDialog(new JFrame(), 
-							"Error: Invalid input(s).", "Error", 
-							JOptionPane.ERROR_MESSAGE);
 				}
 			};
 		});
-
+		panel.addComponent(submitBtn, 0, 3);
+		
+		panel.addNavigationButton("Back to main menu", 12, "Room Service", 0, 4);
+		
 		return panel;
 	}
-	*/
+	
 	private JPanel getCheckOutPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();

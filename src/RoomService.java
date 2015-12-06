@@ -15,20 +15,13 @@ public class RoomService {
 	private final int taskId;
 	private final String task;
 	private final int roomID;
-	private final String completedBy;
-	private final int reservationID;
 	private final Date time;
-	private final int cost;
 
-	public RoomService(int taskId, String task, int roomID, 
-			String completedBy, int reservationID, Date time,int cost) {
+	public RoomService(int taskId, String task, int roomID, Date time) {
 		this.taskId = taskId;
 		this.task = task;
 		this.roomID = roomID;
-		this.completedBy = completedBy;
-		this.reservationID = reservationID;
 		this.time = time;
-		this.cost = cost;
 		
 	}
 	public int getTaskId() {
@@ -39,28 +32,15 @@ public class RoomService {
 		return task;
 	}
 	
-	public String getCustomer() {
-		return customer;
-	}
-	
 	public int getRoomID() {
 		return roomID;
-	}
-	
-	public String getCompletedBy() {
-		return completedBy;
-	}
-	
-	public int getReservationID() {
-		return reservationID;
 	}
 	
 	public Date getTime() {
 		return time;
 	}
 	
-	public int getCost() {
-		return cost;
+	public String toString() {
+		return "Task ID: " + taskId + "\nRoom ID: " + roomID + "\nOrdered on: " + time.toString() + "\nTask: " + task; 
 	}
-	
 }
