@@ -12,20 +12,18 @@ import java.util.Date;
  * A user's Complaint.
  */
 public class RoomService {
-
+	private final int taskId;
 	private final String task;
-	private final String customer;
 	private final int roomID;
 	private final String completedBy;
 	private final int reservationID;
 	private final Date time;
 	private final int cost;
 
-	public RoomService(String task, String customer, int roomID, 
+	public RoomService(int taskId, String task, int roomID, 
 			String completedBy, int reservationID, Date time,int cost) {
-
+		this.taskId = taskId;
 		this.task = task;
-		this.customer = customer;
 		this.roomID = roomID;
 		this.completedBy = completedBy;
 		this.reservationID = reservationID;
@@ -33,7 +31,10 @@ public class RoomService {
 		this.cost = cost;
 		
 	}
-
+	public int getTaskId() {
+		return taskId;
+	}
+	
 	public String getTask() {
 		return task;
 	}

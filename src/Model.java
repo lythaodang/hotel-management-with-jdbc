@@ -457,6 +457,36 @@ public class Model {
 		}
 	}
 	
+	public boolean addRoomService(Reservation r, String task, double cost) {	
+		String query = String.format("INSERT INTO ROOMSERVICE(task,roomId,reservationid,cost)"
+				+ " VALUES('%s','%d','%d','%f')", 
+				task, r.getRoom().getRoomId(), r.getReservationId(), cost);
+
+		try {
+			statement.execute(query);
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	/*
+	public ArrayList<RoomService> getRoomService() {
+		String query = "select * from roomservice where now() + interval 20 day between startdate and enddate";
+		ArrayList<RoomService> roomservice = new ArrayList<RoomService>();
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				if (rs.getString("resolved")))
+				roomservice.add(new RoomService(rs.getString("task"), rs.getString(columnIndex), roomID, completedBy, reservationID, time, cost))
+			}
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	*/
 	public boolean archive(String date) {
 		return false;
 	}
@@ -500,19 +530,5 @@ public class Model {
 		ChangeEvent event = new ChangeEvent(this);
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
-	}
-	
-	public boolean addRoomService(Reservation r, String task, double cost) {	
-		String query = String.format("INSERT INTO ROOMSERVICE(task,roomId,reservationid,cost)"
-				+ " VALUES('%s','%d','%d','%f')", 
-				task, r.getRoom().getRoomId(), r.getReservationId(), cost);
-
-		try {
-			statement.execute(query);
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
 	}
 }
