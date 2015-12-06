@@ -86,6 +86,9 @@ public class View {
 		cards.add(getComplaintsPanel(), "Complaints");		
 		cards.add(getViewRoomServicePanel(), "View Room Service");
 
+		//Kun added
+		cards.add(getVieworOrderRoomServicePanel(), "View/Order");
+				
 		frame.add(cards); // add the panel with card layout to the frame
 
 		// below are the frame's characteristics
@@ -1338,5 +1341,91 @@ public class View {
 			}
 		}
 		return result;
+	}
+	
+	//Kun added
+	private JPanel getVieworOrderRoomServicePanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.ipady = 30;
+		c.gridwidth = 2;
+		panel.addLabel("View/Order Room Service", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.weightx = 0;
+		c.ipady = 0;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("Your current room servicec list: ", 12, "left", null, null, 0, 1);
+		
+		c.gridheight = 3;
+		final JTextArea list = new JTextArea();
+		list.setWrapStyleWord(true);
+        list.setLineWrap(true);
+		list.setEditable(false);
+		panel.addComponent(list);
+		JScrollPane listScroller = new JScrollPane(list);
+		panel.addComponent(listScroller, 0, 2);
+		
+		c.gridheight = 1;
+		List<String> Item = new ArrayList<String>();
+		Item.add("Breakfast");
+		Item.add("Lunch");
+		Item.add("Dinner");
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final JComboBox ServiceComboBox = new JComboBox(Item.toArray());
+		panel.addComponent(ServiceComboBox, 0, 5);
+		
+	
+		
+		JButton submitBtn = new JButton("Order");
+		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
+		submitBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				String Service = (String)ServiceComboBox.getSelectedItem();
+				double cost = 0;
+				if (Service.equals("Breakfast"))
+					cost = 10;
+				else if (Service.equals("Lunch"))
+					cost = 15;
+				else if (Service.equals("Dinner"))
+					cost = 20;
+				else {
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"ServiceComboBox has error", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+				
+				
+				//need help
+				/*
+				Date time = new Date();
+				
+				
+				if (model.addRoomService(task, customer, time.clone(), cost)) {
+					
+				}
+				*/
+				view.switchPanel(model.getCurrentRole());
+			}
+		});
+		panel.addComponent(submitBtn, 0, 6);
+		
+		
+
+		c.gridx = 1;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.switchPanel(model.getCurrentRole());
+			}
+		});
+		panel.addComponent(backBtn, 0, 7);
+		
+		return panel;
 	}
 }

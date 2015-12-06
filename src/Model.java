@@ -497,4 +497,31 @@ public class Model {
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
 	}
+	
+	//Kun added
+	public boolean addRoomService(String task, String customer, Date time, double cost) {	
+		
+		//need double check, i am confused.
+		int ReservationId = 0;
+		int roomId = 0;
+		for (int i=0; i <getCurrentUser().getReservations().size(); i++)
+		{
+			if (getCurrentUser().getReservations().get(i).getCustomer()==customer) {
+				ReservationId = getCurrentUser().getReservations().get(i).getReservationId();
+				roomId = getCurrentUser().getReservations().get(i).getRoom().getRoomId();
+			}
+		}
+		
+		String query = String.format("INSERT INTO ROOMSERVICE(task,customer,roomId,completedBy,reservationID,time,cost)"
+				+ " VALUES('%s','%s','%d','%s','%d',%s,'%d')", 
+				task, customer, roomId,"null",ReservationId,time,cost);
+
+		try {
+			statement.execute(query);
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

@@ -19,10 +19,10 @@ public class RoomService {
 	private final String completedBy;
 	private final int reservationID;
 	private final Date time;
-	private final int cost;
+	private final double cost;
 
 	public RoomService(String task, String customer, int roomID, 
-			String completedBy, int reservationID, Date time,int cost) {
+			String completedBy, int reservationID, Date time,double cost) {
 
 		this.task = task;
 		this.customer = customer;
@@ -58,7 +58,7 @@ public class RoomService {
 		return time;
 	}
 	
-	public int getCost() {
+	public double getCost() {
 		return cost;
 	}
 	
