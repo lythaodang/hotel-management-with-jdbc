@@ -41,6 +41,6 @@ public class RoomService {
 	}
 	
 	public String toString() {
-		return "Task ID: " + taskId + "\nRoom ID: " + roomID + "\nOrdered on: " + time.toString() + "\nTask: " + task; 
+		return "Task ID: " + taskId + " \nRoom ID: " + roomID + " \nOrdered on: " + time.toString() + " \nTask: " + task; 
 	}
 }

@@ -1,3 +1,4 @@
+drop trigger if exists calc_days_update;
 DELIMITER %%;
 create trigger calc_days_update
 before update on reservation

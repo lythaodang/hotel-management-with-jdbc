@@ -1,3 +1,4 @@
+drop trigger if exists calc_days_insert;
 DELIMITER %%;
 create trigger calc_days_insert
 before insert on reservation

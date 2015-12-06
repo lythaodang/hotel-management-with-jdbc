@@ -1,9 +1,12 @@
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.swing.event.ChangeEvent;
@@ -464,6 +467,7 @@ public class Model {
 
 		try {
 			statement.execute(query);
+			update();
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -472,12 +476,14 @@ public class Model {
 	}
 	
 	public ArrayList<RoomService> getRoomService() {
-		String query = "select * from roomservice where now() + interval 20 day between startdate and enddate";
+		String query = "select * from roomservice left outer join "
+				+ "reservation on roomservice.reservationid = reservation.reservationid "
+				+ "where now() + interval 20 day between startdate and enddate";
 		ArrayList<RoomService> roomservice = new ArrayList<RoomService>();
 		try {
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
-				if (rs.getString("completedBy") != null)
+				if (rs.getString("completedBy") == null)
 					roomservice.add(new RoomService(rs.getInt("taskId"), rs.getString("task"), rs.getInt("roomid"), rs.getDate("time")));
 			}
 			return roomservice;
@@ -487,8 +493,8 @@ public class Model {
 		}
 	}
 	
-	public boolean resolveTask() {
-		String query = "update roomservice set compeltedby = '" + currentUser.getUsername() + "'";
+	public boolean resolveTask(int id) {
+		String query = "update roomservice set completedby = '" + currentUser.getUsername() + "' where taskid = " + id;
 		try {
 			statement.execute(query);
 			update();
@@ -499,8 +505,18 @@ public class Model {
 		}
 	}
 	
-	public boolean archive(String date) {
-		return false;
+	public boolean archive(Date date) {
+		Timestamp timestamp = new Timestamp(date.getTime());
+		try {
+			CallableStatement cs = connection.prepareCall("{call archiveAll(?)}");
+			cs.setTimestamp("cutoffDate", timestamp);
+			cs.execute();
+			update();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public String sqlToDate(String date) {

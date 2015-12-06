@@ -2,9 +2,11 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
+import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,7 +79,7 @@ public class View {
 
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
-		cards.add(getRoomServicePanel(), "Room Service");
+		cards.add(getRoomServicePanel(), "Tasks");
 		cards.add(getStatisticsPanel(), "Statistics");
 		cards.add(getArchivePanel(), "Archive");
 		cards.add(getUsersPanel(), "Users");
@@ -126,11 +128,11 @@ public class View {
 		panel.addLabel("Archive", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
 		c.ipady = 0;
-		
+
 		c.insets = new Insets(10,10,10,10);
 		panel.addLabel("<html>Enter a date. Reservations, room service requests, and "
 				+ "complaints will be archived from this date.</html>", 12, "left", null, null, 0, 1);
-		
+
 		c.gridwidth = 1;
 		c.weighty = 1;
 		panel.addLabel("Date to archive from (MM/DD/YYYY):", 12, "left", null, null, 0, 2);
@@ -151,14 +153,14 @@ public class View {
 					if (cal != null) {
 						int response = JOptionPane.showConfirmDialog(
 								new JFrame(), "Are you sure you want to archive?",
-										"Confirmation", JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE);
+								"Confirmation", JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE);
 						if (response == JOptionPane.NO_OPTION) ;
 						if (response == JOptionPane.YES_OPTION) {
-							if(!model.archive(archiveDate)) 
-									JOptionPane.showMessageDialog(new JFrame(), 
-											"An unexpected error has occurred. Please contact your system admin.", "Error", 
-											JOptionPane.ERROR_MESSAGE);	
+							if(!model.archive(cal.getTime())) 
+								JOptionPane.showMessageDialog(new JFrame(), 
+										"An unexpected error has occurred. Please contact your system admin.", "Error", 
+										JOptionPane.ERROR_MESSAGE);	
 							else {
 								JOptionPane.showMessageDialog(new JFrame(), "Archive Successful", "Result", JOptionPane.DEFAULT_OPTION);
 								panel.clearComponents();
@@ -178,7 +180,7 @@ public class View {
 		panel.addNavigationButton("Back to main menu", 12, "Manager", 0, 4);
 		return panel;
 	}
-	
+
 	private JPanel getLoginPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -549,11 +551,10 @@ public class View {
 		c.gridwidth = 2;
 		if (role.equalsIgnoreCase("manager")) {
 			panel.addNavigationButton("Reservations", 16, "Reservations", 0, 1);
-			panel.addNavigationButton("Room Service", 16, "Room Service", 0, 2);
-			panel.addNavigationButton("Complaints", 16, "Complaints", 0, 3); 
-			panel.addNavigationButton("Users", 16, "Users", 0, 4);
-			panel.addNavigationButton("Statistics", 16, "Statistics", 0, 5);
-			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 6);
+			panel.addNavigationButton("Complaints", 16, "Complaints", 0, 2); 
+			panel.addNavigationButton("Users", 16, "Users", 0, 3);
+			panel.addNavigationButton("Statistics", 16, "Statistics", 0, 4);
+			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 5);
 		}
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
@@ -562,7 +563,7 @@ public class View {
 			panel.addNavigationButton("File Complaint", 16, "File Complaint", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
-			panel.addNavigationButton("Tasks", 16, "Room Service", 0, 1);
+			panel.addNavigationButton("Tasks", 16, "Tasks", 0, 1);
 		}
 		else {
 			panel.addNavigationButton("Check Out a Customer", 16, "Check out", 0, 3);
@@ -800,7 +801,7 @@ public class View {
 					for (Reservation r : model.getCurrentUser().getReservations())
 						if (!r.getCanceled())
 							notCanceled.add(r);
-					
+
 					list.setListData(notCanceled.toArray());
 				}
 				else list.setListData(new Reservation[0]);
@@ -849,7 +850,7 @@ public class View {
 		c.ipady = 30;
 		c.weighty = 0;
 		panel.addLabel("Reservations", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-		
+
 		c.ipady = 0;
 		c.insets = new Insets(10,10,10,10);
 		panel.addLabel("Enter a min and max and sort by room or customer.", 12, "left", 
@@ -879,7 +880,7 @@ public class View {
 		final JTextArea list = new JTextArea();
 		list.setEditable(false);
 		list.setWrapStyleWord(true);
-        list.setLineWrap(true);
+		list.setLineWrap(true);
 		JScrollPane scrollPane = new JScrollPane(list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -978,7 +979,7 @@ public class View {
 		final JTextArea list = new JTextArea();
 		list.setEditable(false);
 		list.setWrapStyleWord(true);
-        list.setLineWrap(true);
+		list.setLineWrap(true);
 		JScrollPane scrollPane = new JScrollPane(list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -1071,7 +1072,7 @@ public class View {
 
 		final JTextArea complaint = new JTextArea();
 		complaint.setWrapStyleWord(true);
-        complaint.setLineWrap(true);
+		complaint.setLineWrap(true);
 		panel.addComponent(complaint, 0, 2);
 
 		c.weighty = 0;
@@ -1123,12 +1124,12 @@ public class View {
 
 		final JTextArea stats = new JTextArea();
 		stats.setWrapStyleWord(true);
-        stats.setLineWrap(true);
-        stats.setLineWrap(true);
-        stats.setWrapStyleWord(true);
-        stats.setOpaque(false);
-        stats.setEditable(false);
-        stats.setBorder(new EmptyBorder(10,10,2,2));
+		stats.setLineWrap(true);
+		stats.setLineWrap(true);
+		stats.setWrapStyleWord(true);
+		stats.setOpaque(false);
+		stats.setEditable(false);
+		stats.setBorder(new EmptyBorder(10,10,2,2));
 		panel.addComponent(stats, 0, 2);
 
 		c.weighty = 0;
@@ -1142,7 +1143,7 @@ public class View {
 			}
 		});
 		panel.addComponent(backBtn, 0, 3);
-		
+
 		model.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				String output = model.getStatistics();
@@ -1159,7 +1160,7 @@ public class View {
 
 		return panel;
 	}
-	
+
 	private JPanel getComplaintsPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -1182,7 +1183,7 @@ public class View {
 
 		final JTextArea solTA = new JTextArea();
 		solTA.setWrapStyleWord(true);
-        solTA.setLineWrap(true);
+		solTA.setLineWrap(true);
 		panel.addComponent(solTA, 1, 5);
 
 		JButton submitBtn = new JButton("Resolve Complaint");
@@ -1198,11 +1199,11 @@ public class View {
 			}
 		});
 		panel.addComponent(backBtn, 0, 6);
-		
+
 		c.gridheight = 5;
 		final JTextArea list = new JTextArea();
 		list.setWrapStyleWord(true);
-        list.setLineWrap(true);
+		list.setLineWrap(true);
 		list.setEditable(false);
 		panel.addComponent(list);
 		JScrollPane listScroller = new JScrollPane(list);
@@ -1269,20 +1270,19 @@ public class View {
 
 		return panel;
 	}
-	
+
 	private JPanel getRoomServicePanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
 		c.ipady = 30;
-		c.gridwidth = 2;
 		panel.addLabel("Room Service Tasks", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
 		c.weightx = 0;
 		c.ipady = 0;
 		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
-		panel.addLabel("Select a task", 12, "left", null, null, 1, 1);
+		panel.addLabel("Select a task", 12, "left", null, null, 0, 1);
 
 		@SuppressWarnings("rawtypes")
 		final JList list = new JList();
@@ -1322,7 +1322,8 @@ public class View {
 							JOptionPane.QUESTION_MESSAGE);
 					if (response == JOptionPane.NO_OPTION) ;
 					if (response == JOptionPane.YES_OPTION) {
-						if (!model.resolveTask())
+						RoomService rs = (RoomService)list.getSelectedValue();
+						if (!model.resolveTask(rs.getTaskId()))
 							JOptionPane.showMessageDialog(new JFrame(), 
 									"An unexpected error has occurred. Please contact your system admin.", "Error", 
 									JOptionPane.ERROR_MESSAGE);
@@ -1331,12 +1332,12 @@ public class View {
 			};
 		});
 		panel.addComponent(submitBtn, 0, 3);
-		
+
 		panel.addNavigationButton("Back to main menu", 12, "Room Service", 0, 4);
-		
+
 		return panel;
 	}
-	
+
 	private JPanel getCheckOutPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -1348,7 +1349,7 @@ public class View {
 		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
 		panel.addLabel("<html>Select a reservation to check out.<br>Note: The query has been fast forwarded 20 days</html>", 12, "left", null, null, 0, 1);
-		
+
 		@SuppressWarnings("rawtypes")
 		final JList list = new JList();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -1466,7 +1467,7 @@ public class View {
 		}
 		return result;
 	}
-	
+
 	private JPanel getOrderRoomServicePanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -1480,7 +1481,7 @@ public class View {
 		panel.addLabel("<html>Select reservation and choose room service.<br>"
 				+ "Note: For testing purposes, comparison date to get "
 				+ "reservations is 20 days from today.</html>", 12, "left", null, null, 0, 1);
-		
+
 		@SuppressWarnings("rawtypes")
 		final JList list = new JList();
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -1490,7 +1491,7 @@ public class View {
 		c.weighty = 1;
 		panel.addComponent(listScroller, 0, 2);
 		panel.addComponent(list);
-		
+
 		c.gridheight = 1;
 		List<String> Item = new ArrayList<String>();
 		Item.add("Select a meal");
@@ -1500,7 +1501,7 @@ public class View {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final JComboBox ServiceComboBox = new JComboBox(Item.toArray());
 		panel.addComponent(ServiceComboBox, 0, 3);
-		
+
 		c.gridwidth = 1;
 		JButton submitBtn = new JButton("Order");
 		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -1519,7 +1520,7 @@ public class View {
 					JOptionPane.showMessageDialog(new JFrame(), 
 							"Error: Select a service.", "Error", 
 							JOptionPane.ERROR_MESSAGE);
-			
+
 				if (!list.isSelectionEmpty() && cost != 0) {
 					int response = JOptionPane.showConfirmDialog(new JFrame(),
 							"Are you sure you want to order this service?",
@@ -1536,7 +1537,7 @@ public class View {
 									"Room service ordered", "Result", JOptionPane.DEFAULT_OPTION);
 					}
 				}
-				
+
 			}
 		});
 		panel.addComponent(submitBtn, 1, 4);
@@ -1569,7 +1570,7 @@ public class View {
 			}
 		});
 		panel.addComponent(backBtn, 0, 4);
-		
+
 		return panel;
 	}
 }

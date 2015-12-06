@@ -1,3 +1,4 @@
+drop trigger if exists check_account_creation;
 DELIMITER %%;
 CREATE TRIGGER check_account_creation
 BEFORE INSERT ON USER
