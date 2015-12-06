@@ -232,6 +232,18 @@ INSERT into reservation (roomId, customer, startDate, endDate, numOfDays)
 values (2, "cust1id", "2015-11-20", "2015-11-25", 5);
 INSERT into reservation (roomId, customer, startDate, endDate, numOfDays)
 values (3, "cust1id", "2015-12-20", "2015-12-25", 5);
+INSERT into reservation (reservationId, roomId, customer, startDate, endDate, numOfDays)
+values (5, 4, "kunsuC", "2015-12-20", "2015-12-25", 5);
+
+INSERT into complaint (customer, complaint, time, resolvedBy, solution)
+values ("kunsuC", "this is the first complaint", "2015-12-05", null, null);
+INSERT into complaint (customer, complaint, time, resolvedBy, solution)
+values ("kunsuC", "this is the second complaint", "2015-12-05", "KunsuM", "the second solution");
+
+INSERT into roomservice (task, roomId, completedBy, reservationId, time, cost)
+values ("Breakfast", 4, null, 5, "2015-12-05", 20);
+INSERT into roomservice (task, roomId, completedBy, reservationId, time, cost)
+values ("Lunch", 4, null, 5, "2015-12-05", 20);
 
 SELECT * FROM complaint;
 SELECT * FROM reservation;
@@ -239,7 +251,7 @@ SELECT * FROM room;
 SELECT * FROM user;
 
 
-LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\complaint.txt' INTO TABLE complaint;
+LOAD DATA LOCAL INFILE 'complaint.txt' INTO TABLE complaint;
 LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\reservation.txt' INTO TABLE reservation;
 LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\room.txt' INTO TABLE room;
 LOAD DATA LOCAL INFILE 'C:\\Users\\kun\\Desktop\\学习\\Fall 2015\\CS 157A Database\\group project\\HotelJDBC\\user.txt' INTO TABLE user;
