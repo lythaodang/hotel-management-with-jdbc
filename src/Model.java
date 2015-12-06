@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.swing.event.ChangeEvent;
@@ -458,6 +457,10 @@ public class Model {
 		}
 	}
 	
+	public boolean archive(String date) {
+		return false;
+	}
+	
 	public String sqlToDate(String date) {
 		return "str_to_date('" + date + "', '%m/%d/%Y')";
 	}
@@ -499,23 +502,10 @@ public class Model {
 			listener.stateChanged(event);
 	}
 	
-	//Kun added
-	public boolean addRoomService(String task, String customer, Date time, double cost) {	
-		
-		//need double check, i am confused.
-		int ReservationId = 0;
-		int roomId = 0;
-		for (int i=0; i <getCurrentUser().getReservations().size(); i++)
-		{
-			if (getCurrentUser().getReservations().get(i).getCustomer()==customer) {
-				ReservationId = getCurrentUser().getReservations().get(i).getReservationId();
-				roomId = getCurrentUser().getReservations().get(i).getRoom().getRoomId();
-			}
-		}
-		
-		String query = String.format("INSERT INTO ROOMSERVICE(task,customer,roomId,completedBy,reservationID,time,cost)"
-				+ " VALUES('%s','%s','%d','%s','%d',%s,'%d')", 
-				task, customer, roomId,"null",ReservationId,time,cost);
+	public boolean addRoomService(Reservation r, String task, double cost) {	
+		String query = String.format("INSERT INTO ROOMSERVICE(task,roomId,reservationid,cost)"
+				+ " VALUES('%s','%d','%d','%f')", 
+				task, r.getRoom().getRoomId(), r.getReservationId(), cost);
 
 		try {
 			statement.execute(query);

@@ -72,23 +72,21 @@ public class View {
 		cards.add(getMakeReservationPanel(), "Book");
 		cards.add(getReceiptPanel(), "Receipt");
 		cards.add(getCustViewCancelPanel(), "View/Cancel");
-		// cards.add(getCustRoomServicePanel(), "View/Order");
+		cards.add(getOrderRoomServicePanel(), "Order");
 		cards.add(getFileComplaintPanel(), "File Complaint");
 
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
 		// cards.add(getRoomServicePanel(), "Room Service");
 		cards.add(getStatisticsPanel(), "Statistics");
-		// cards.add(getArchivePanel(), "Archive");
+		cards.add(getArchivePanel(), "Archive");
 		cards.add(getUsersPanel(), "Users");
 		cards.add(getCheckOutPanel(), "Check out");
 
 		cards.add(getComplaintsPanel(), "Complaints");		
 		cards.add(getViewRoomServicePanel(), "View Room Service");
 
-		//Kun added
-		cards.add(getVieworOrderRoomServicePanel(), "View/Order");
-				
+		
 		frame.add(cards); // add the panel with card layout to the frame
 
 		// below are the frame's characteristics
@@ -120,6 +118,68 @@ public class View {
 		cardLayout.show(cards, panelName);
 	}
 
+	private JPanel getArchivePanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.gridwidth = 2;
+		c.ipady = 30;
+		panel.addLabel("Archive", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.ipady = 0;
+		
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("<html>Enter a date. Reservations, room service requests, and "
+				+ "complaints will be archived from this date.</html>", 12, "left", null, null, 0, 1);
+		
+		c.gridwidth = 1;
+		c.weighty = 1;
+		panel.addLabel("Date to archive from (MM/DD/YYYY):", 12, "left", null, null, 0, 2);
+		c.gridwidth = 1;
+		final JTextField date = new JTextField();
+		panel.addComponent(date, 1, 2);
+
+		c.gridwidth = 2;
+		JButton archiveBtn = new JButton("Archive");
+		archiveBtn.setFont(new Font("Tahoma", Font.BOLD, 16));
+		archiveBtn.addActionListener(new ActionListener() {
+			@Override() 
+			public void actionPerformed(ActionEvent e) {
+				String archiveDate = date.getText();
+				GregorianCalendar cal;
+				if (archiveDate.length() == 10) {
+					cal = isValidDateFormat(archiveDate);
+					if (cal != null) {
+						int response = JOptionPane.showConfirmDialog(
+								new JFrame(), "Are you sure you want to archive?",
+										"Confirmation", JOptionPane.YES_NO_OPTION,
+										JOptionPane.QUESTION_MESSAGE);
+						if (response == JOptionPane.NO_OPTION) ;
+						if (response == JOptionPane.YES_OPTION) {
+							if(!model.archive(archiveDate)) 
+									JOptionPane.showMessageDialog(new JFrame(), 
+											"An unexpected error has occurred. Please contact your system admin.", "Error", 
+											JOptionPane.ERROR_MESSAGE);	
+							else {
+								JOptionPane.showMessageDialog(new JFrame(), "Archive Successful", "Result", JOptionPane.DEFAULT_OPTION);
+								panel.clearComponents();
+								switchPanel("Manager");
+							}
+						}
+					}
+					else 
+						JOptionPane.showMessageDialog(new JFrame(),
+								"Error: Invalid format.", "Error",
+								JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		panel.addComponent(archiveBtn, 0, 3);
+
+		panel.addNavigationButton("Back to main menu", 12, "Manager", 0, 4);
+		return panel;
+	}
+	
 	private JPanel getLoginPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -499,7 +559,7 @@ public class View {
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
 			panel.addNavigationButton("View/Cancel Reservations", 16, "View/Cancel", 0, 2);
-			panel.addNavigationButton("View/Order Room Service", 16, "View/Order", 0, 3);
+			panel.addNavigationButton("Order Room Service", 16, "Order", 0, 3);
 			panel.addNavigationButton("File Complaint", 16, "File Complaint", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
@@ -1219,7 +1279,6 @@ public class View {
 		c.ipady = 30;
 		panel.addLabel("Check Out", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
-		c.weightx = 0;
 		c.ipady = 0;
 		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
@@ -1343,88 +1402,108 @@ public class View {
 		return result;
 	}
 	
-	//Kun added
-	private JPanel getVieworOrderRoomServicePanel() {
+	private JPanel getOrderRoomServicePanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
 		c.ipady = 30;
 		c.gridwidth = 2;
-		panel.addLabel("View/Order Room Service", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+		panel.addLabel("Order Room Service", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
-		c.weightx = 0;
 		c.ipady = 0;
-		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
-		panel.addLabel("Your current room servicec list: ", 12, "left", null, null, 0, 1);
+		panel.addLabel("<html>Select reservation and choose room service.<br>"
+				+ "Note: For testing purposes, comparison date to get "
+				+ "reservations is 20 days from today.</html>", 12, "left", null, null, 0, 1);
 		
-		c.gridheight = 3;
-		final JTextArea list = new JTextArea();
-		list.setWrapStyleWord(true);
-        list.setLineWrap(true);
-		list.setEditable(false);
-		panel.addComponent(list);
+		@SuppressWarnings("rawtypes")
+		final JList list = new JList();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
 		JScrollPane listScroller = new JScrollPane(list);
+		c.weighty = 1;
 		panel.addComponent(listScroller, 0, 2);
+		panel.addComponent(list);
 		
 		c.gridheight = 1;
 		List<String> Item = new ArrayList<String>();
+		Item.add("Select a meal");
 		Item.add("Breakfast");
 		Item.add("Lunch");
 		Item.add("Dinner");
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final JComboBox ServiceComboBox = new JComboBox(Item.toArray());
-		panel.addComponent(ServiceComboBox, 0, 5);
+		panel.addComponent(ServiceComboBox, 0, 3);
 		
-	
-		
+		c.gridwidth = 1;
 		JButton submitBtn = new JButton("Order");
 		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
 		submitBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				String Service = (String)ServiceComboBox.getSelectedItem();
+				String service = (String)ServiceComboBox.getSelectedItem();
 				double cost = 0;
-				if (Service.equals("Breakfast"))
+				if (service.equals("Breakfast"))
 					cost = 10;
-				else if (Service.equals("Lunch"))
+				else if (service.equals("Lunch"))
 					cost = 15;
-				else if (Service.equals("Dinner"))
+				else if (service.equals("Dinner"))
 					cost = 20;
-				else {
+				else 
 					JOptionPane.showMessageDialog(new JFrame(), 
-							"ServiceComboBox has error", "Error", 
+							"Error: Select a service.", "Error", 
 							JOptionPane.ERROR_MESSAGE);
+			
+				if (!list.isSelectionEmpty() && cost != 0) {
+					int response = JOptionPane.showConfirmDialog(new JFrame(),
+							"Are you sure you want to order this service?",
+							"Confirmation", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.NO_OPTION) ;
+					if (response == JOptionPane.YES_OPTION) {
+						if (!model.addRoomService((Reservation)list.getSelectedValue(), service, cost)) 
+							JOptionPane.showMessageDialog(new JFrame(), 
+									"An unexpected error has occurred. Please contact your system admin.", "Error", 
+									JOptionPane.ERROR_MESSAGE);
+						else
+							JOptionPane.showMessageDialog(new JFrame(), 
+									"Room service ordered", "Result", JOptionPane.DEFAULT_OPTION);
+					}
 				}
 				
-				
-				//need help
-				/*
-				Date time = new Date();
-				
-				
-				if (model.addRoomService(task, customer, time.clone(), cost)) {
-					
-				}
-				*/
-				view.switchPanel(model.getCurrentRole());
 			}
 		});
-		panel.addComponent(submitBtn, 0, 6);
-		
-		
+		panel.addComponent(submitBtn, 1, 4);
 
-		c.gridx = 1;
+		model.addChangeListener(new ChangeListener() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				ArrayList<Reservation> notCanceled = new ArrayList<Reservation>();
+				if (model.getCurrentUser() != null) {
+					Calendar c = Calendar.getInstance();
+					c.add(Calendar.DATE, 20);
+					Date compDate = c.getTime();
+					for (Reservation r : model.getCurrentUser().getReservations()) {
+						if (!r.getCanceled() && (compDate.after(r.getStartDate()) && compDate.before(r.getEndDate())))							
+							notCanceled.add(r);
+					}
+					list.setListData(notCanceled.toArray());
+				}
+				else list.setListData(new Reservation[0]);
+			}
+		});
+
 		JButton backBtn = new JButton("Back to main menu");
 		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 		backBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				view.switchPanel(model.getCurrentRole());
+				view.switchPanel("Customer");
 			}
 		});
-		panel.addComponent(backBtn, 0, 7);
+		panel.addComponent(backBtn, 0, 4);
 		
 		return panel;
 	}
