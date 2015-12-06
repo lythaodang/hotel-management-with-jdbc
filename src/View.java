@@ -632,6 +632,10 @@ public class View {
 							JOptionPane.showMessageDialog(new JFrame(),
 									"Error: Reservation cannot be longer than 60 days.", "Error",
 									JOptionPane.ERROR_MESSAGE);
+						else if (inCal.equals(outCal))
+							JOptionPane.showMessageDialog(new JFrame(),
+									"Error: Check-in and check-out cannot be the same day.", "Error",
+									JOptionPane.ERROR_MESSAGE);
 						else {
 							if (model.getAvailRooms(in, out) != null)
 								list.setListData(model.getAvailRooms(in, out).toArray());

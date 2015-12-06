@@ -36,7 +36,25 @@ CREATE TABLE reservation (
 	keyReturned BOOLEAN NOT NULL DEFAULT FALSE,
 	paid BOOLEAN NOT NULL DEFAULT FALSE,
 	canceled BOOLEAN NOT NULL DEFAULT FALSE,
-    updatedOn TIMESTAMP NOT NULL ON UPDATE current_timestamp,
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
+	PRIMARY KEY (reservationId),
+	FOREIGN KEY (roomId) references room (roomId) ON DELETE CASCADE,
+	FOREIGN KEY (customer) references user (username) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS archive_reservation;
+CREATE TABLE archive_reservation (
+	reservationId INT(10) NOT NULL,
+	roomId INT(10) NOT NULL,
+	customer VARCHAR(12) NOT NULL,
+	startDate DATE NOT NULL,
+	endDate DATE NOT NULL,
+	numOfDays INT(10) NOT NULL,
+	totalCost DOUBLE(10,2),
+	keyReturned BOOLEAN NOT NULL DEFAULT FALSE,
+	paid BOOLEAN NOT NULL DEFAULT FALSE,
+	canceled BOOLEAN NOT NULL DEFAULT FALSE,
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
 	PRIMARY KEY (reservationId),
 	FOREIGN KEY (roomId) references room (roomId) ON DELETE CASCADE,
 	FOREIGN KEY (customer) references user (username) ON DELETE CASCADE
@@ -51,7 +69,23 @@ CREATE TABLE roomservice (
 	reservationId INT(10) NOT NULL,
 	time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	cost DOUBLE(10,2) NOT NULL,
-    updatedOn TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (taskId),
+    FOREIGN KEY (completedBy) references user (username) ON DELETE CASCADE,
+	FOREIGN KEY (roomId) references room (roomId) ON DELETE CASCADE,
+	FOREIGN KEY (reservationId) references reservation (reservationId) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS archive_roomservice;
+CREATE TABLE archive_roomservice (
+	taskId INT(10) NOT NULL,
+	task VARCHAR(250) NOT NULL,
+	roomId INT(10) NOT NULL,
+    completedBy VARCHAR(12),
+	reservationId INT(10) NOT NULL,
+	time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	cost DOUBLE(10,2) NOT NULL,
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (taskId),
     FOREIGN KEY (completedBy) references user (username) ON DELETE CASCADE,
 	FOREIGN KEY (roomId) references room (roomId) ON DELETE CASCADE,
@@ -66,7 +100,21 @@ CREATE TABLE complaint (
 	time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	resolvedBy VARCHAR(12),
 	solution VARCHAR(100),
-    updatedOn TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (complaintId),
+	FOREIGN KEY (customer) references user (username) ON DELETE CASCADE,
+	FOREIGN KEY (resolvedBy) references user (username) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS archive_complaint;
+CREATE TABLE archive_complaint (
+	complaintId INT(10) NOT NULL,
+	customer VARCHAR(12) NOT NULL,
+	complaint VARCHAR(100) NOT NULL,
+	time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	resolvedBy VARCHAR(12),
+	solution VARCHAR(100),
+    updatedOn TIMESTAMP NOT NULL DEFAULT current_timestamp  ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (complaintId),
 	FOREIGN KEY (customer) references user (username) ON DELETE CASCADE,
 	FOREIGN KEY (resolvedBy) references user (username) ON DELETE CASCADE
