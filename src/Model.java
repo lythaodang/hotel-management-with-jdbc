@@ -104,12 +104,47 @@ public class Model {
 			return false;
 		}
 	}
+	
+	public boolean checkOutReservation(Reservation r) {
+		String query = "update reservation set paid = true and keyreturned = true where reservationid = " + r.getReservationId(); 
+		try {
+			statement.execute(query);
+			setCurrentUser(currentUser.getUsername());
+			update();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 	public ArrayList<Reservation> getAllReservations() {
 		ArrayList<Reservation> resList = new ArrayList<Reservation>();
 
 		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
 				+ "from room right outer join reservation on room.roomid = reservation.roomid ";
+		try {
+			ResultSet rs = statement.executeQuery(queryRes);
+			while (rs.next()) {
+				Room room = new Room(rs.getInt("roomid"), rs.getDouble("costPerNight"), rs.getString("roomtype"));
+				Reservation res = new Reservation(rs.getInt("reservationid"), rs.getString("customer"), room, 
+						rs.getDate("startdate"), rs.getDate("enddate"), rs.getInt("numOfDays"), rs.getDouble("totalCost"),
+						rs.getBoolean("canceled"));
+				resList.add(res);
+			}
+			rs.close();
+			return resList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public ArrayList<Reservation> getCheckOut() {
+		ArrayList<Reservation> resList = new ArrayList<Reservation>();
+
+		String queryRes = "select canceled, customer, reservationId, room.roomId, startDate, endDate, numOfDays, totalCost, costpernight, roomtype "
+				+ "from room right outer join reservation on room.roomid = reservation.roomid where (now() + interval 20 day between startdate and enddate) and canceled <> true";
 		try {
 			ResultSet rs = statement.executeQuery(queryRes);
 			while (rs.next()) {
@@ -393,7 +428,35 @@ public class Model {
 			return false;
 		}
 	}
-
+	
+	public String getStatistics() {
+		String avgAge = "select avg(age) from user", 
+		avgNumRes = "select avg(rescount) from (select count(*) as rescount from reservation group by customer) counts",
+		avgCost = "select avg(totalcost) from reservation", result = "";
+		
+		try {
+			ResultSet rs = statement.executeQuery(avgAge);
+			if (rs.next())
+				result += "Average age of users: " + rs.getString(1);
+			rs.close();
+			
+			rs = statement.executeQuery(avgNumRes);
+			if (rs.next())
+				result += "\nAverage number of reservations per customer: " + rs.getString(1);
+			rs.close();
+			
+			rs = statement.executeQuery(avgCost);
+			if (rs.next())
+				result += "\nAverage cost of a reservation " + rs.getString(1);
+			rs.close();
+			
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public String sqlToDate(String date) {
 		return "str_to_date('" + date + "', '%m/%d/%Y')";
 	}

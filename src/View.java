@@ -24,6 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
@@ -77,10 +78,10 @@ public class View {
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
 		// cards.add(getRoomServicePanel(), "Room Service");
-		// cards.add(getStatisticsPanel(), "Statistics");
+		cards.add(getStatisticsPanel(), "Statistics");
 		// cards.add(getArchivePanel(), "Archive");
 		cards.add(getUsersPanel(), "Users");
-		// cards.add(getCheckOutPanel(), "Check out");
+		cards.add(getCheckOutPanel(), "Check out");
 
 		cards.add(getComplaintsPanel(), "Complaints");		
 		cards.add(getViewRoomServicePanel(), "View Room Service");
@@ -782,14 +783,12 @@ public class View {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
-		c.weighty = 1;
 		c.gridwidth = 4;
-		c.weightx = 1;
 		c.ipady = 30;
+		c.weighty = 0;
 		panel.addLabel("Reservations", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 		
 		c.ipady = 0;
-		c.weightx = 0;
 		c.insets = new Insets(10,10,10,10);
 		panel.addLabel("Enter a min and max and sort by room or customer.", 12, "left", 
 				null, null, 0, 1);
@@ -1048,6 +1047,57 @@ public class View {
 		return panel;
 	}
 
+	private JPanel getStatisticsPanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.weighty = 1;
+		c.ipady = 30;
+		panel.addLabel("Statistics", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.ipady = 0;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("<html>Here are several commonly calculated statistics.<html>", 12, "left", null, null, 0, 1);
+
+		final JTextArea stats = new JTextArea();
+		stats.setWrapStyleWord(true);
+        stats.setLineWrap(true);
+        stats.setLineWrap(true);
+        stats.setWrapStyleWord(true);
+        stats.setOpaque(false);
+        stats.setEditable(false);
+        stats.setBorder(new EmptyBorder(10,10,2,2));
+		panel.addComponent(stats, 0, 2);
+
+		c.weighty = 0;
+		c.gridx = 1;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.switchPanel("Manager");
+			}
+		});
+		panel.addComponent(backBtn, 0, 3);
+		
+		model.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				String output = model.getStatistics();
+				if (output != null){
+					stats.setText(output);
+				}
+				else {
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+			};
+		});
+
+		return panel;
+	}
+	
 	private JPanel getComplaintsPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
@@ -1156,6 +1206,74 @@ public class View {
 			};
 		});
 
+		return panel;
+	}
+	
+	private JPanel getCheckOutPanel() {
+		final BasicPanel panel = new BasicPanel(this);
+		GridBagConstraints c = panel.getConstraints();
+
+		c.ipady = 30;
+		panel.addLabel("Check Out", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.weightx = 0;
+		c.ipady = 0;
+		c.gridwidth = 1;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("<html>Select a reservation to check out.<br>Note: The query has been fast forwarded 20 days</html>", 12, "left", null, null, 0, 1);
+		
+		@SuppressWarnings("rawtypes")
+		final JList list = new JList();
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
+		JScrollPane listScroller = new JScrollPane(list);
+		c.weighty = 1;
+		panel.addComponent(listScroller, 0, 2);
+		panel.addComponent(list);
+
+		model.addChangeListener(new ChangeListener() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				ArrayList<Reservation> current = model.getCheckOut();
+				if (current != null) 
+					list.setListData(current.toArray());
+				else list.setListData(new Reservation[0]);
+			}
+		});
+
+		c.weighty = 0;
+		JButton checkOutBtn = new JButton("Cancel");
+		checkOutBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (!list.isSelectionEmpty()) {
+					int response = JOptionPane.showConfirmDialog(new JFrame(),
+							"Are you sure you want to check out this reservation?",
+							"Confirmation", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+					if (response == JOptionPane.NO_OPTION) ;
+					if (response == JOptionPane.YES_OPTION) {
+						if (!model.cancelReservation((Reservation) list.getSelectedValue()))
+							JOptionPane.showMessageDialog(new JFrame(), 
+									"An unexpected error has occurred. Please contact your system admin.", "Error", 
+									JOptionPane.ERROR_MESSAGE);;
+					}
+				}
+			}
+		});
+		panel.addComponent(checkOutBtn, 0, 3);
+
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				view.switchPanel("Receptionist");
+			}
+		});
+		panel.addComponent(backBtn, 0, 4);
 		return panel;
 	}
 
