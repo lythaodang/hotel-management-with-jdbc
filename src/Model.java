@@ -2,10 +2,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import javax.swing.event.ChangeEvent;
@@ -33,9 +31,6 @@ public class Model {
 	private String currentRole;
 	private ArrayList<Reservation> reservations;
 
-	//Kun added
-	private ArrayList<Complaint> complaints;
-
 	// variables used for manager
 	private Connection connection = JDBCUtil.getConnectionByDriverManager();
 	private Statement statement = JDBCUtil.getStatement(connection);
@@ -53,7 +48,6 @@ public class Model {
 		currentUser = null;
 		currentRole = null;
 		reservations = new ArrayList<Reservation>();
-		complaints = new ArrayList<Complaint>();
 	}
 
 	/**
@@ -334,22 +328,13 @@ public class Model {
 		return null;
 	}
 
-	//Kun added
 	public boolean addComplaint(String customer, String complaintTest) {	
-
-		final Date time = new Date();
-		new SimpleDateFormat("MM/dd/yyyy").format(time.getTime());
-		Complaint complaintObject = new Complaint(currentUser.getUsername(), complaintTest, time, 
-				"null", "null");
-
 		String query = String.format("INSERT INTO COMPLAINT(customer,complaint)"
 				+ " VALUES('%s','%s')", 
 				currentUser.getUsername(), complaintTest);
 
 		try {
 			statement.execute(query);
-			complaints.add(complaintObject);
-			System.out.println("complaint: " + complaints.size());
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -357,25 +342,56 @@ public class Model {
 		}
 	}
 
-	//Kun added
-	public void getFeedback() {
-
+	public ArrayList<Complaint> getComplaints() {
+		ArrayList<Complaint> complaints = new ArrayList<Complaint>();
 		String query = "SELECT * FROM COMPLAINT";
 
 		try {
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
-				complaints.add(new Complaint(rs.getString("customer"),rs.getString("complaint"),
+				complaints.add(new Complaint(rs.getInt("complaintId"), rs.getString("customer"),rs.getString("complaint"),
 						rs.getDate("time"),rs.getString("resolvedBy"),rs.getString("solution")));
 			}
 			
 			rs.close();
-			System.out.println("Model Runing4");
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return null;
 		}
-		update();
+		
+		return complaints;
+	}
+	
+	public Complaint getComplaint(int id) {
+		String query = "SELECT * FROM COMPLAINT where complaintid = " + id;
+		Complaint c = null;
+		
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			if (rs.next()) 
+				c = new Complaint(rs.getInt("complaintId"), rs.getString("customer"),rs.getString("complaint"),
+						rs.getDate("time"),rs.getString("resolvedBy"),rs.getString("solution"));
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return c;
+	}
+	
+	public boolean updateComplaint(int id, String resolvedBy, String solution) {
+		String query = "update complaint set resolvedBy = '" + resolvedBy 
+				+ "', solution = '" + solution + "' where complaintId = " + id;
+		try {
+			statement.execute(query);
+			update();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public String sqlToDate(String date) {
@@ -402,10 +418,6 @@ public class Model {
 		reservations = new ArrayList<Reservation>();
 	}
 
-	public ArrayList<Complaint> getComplaints() {
-		return complaints;
-	}
-
 	/**
 	 * Adds the changelisteners
 	 * @param accounts the accounts to set
@@ -421,22 +433,5 @@ public class Model {
 		ChangeEvent event = new ChangeEvent(this);
 		for (ChangeListener listener : listeners)
 			listener.stateChanged(event);
-	}
-	
-	//Kun added 
-	public boolean updateComplaint(String customer, String ComplaintTest, String resolvedBy, String solution) {
-
-		String query = "UPDATE COMPLAINT SET COMPLAINT.RESOLVEDBY = '" + resolvedBy +
-				"' , COMPLAINT.SOLUTION = '" + solution + "' WHERE COMPLAINT.CUSTOMER = '" + customer + "'" + 
-				" AND COMPLAINT.COMPLAINT = '" + ComplaintTest + "'";
-		//System.out.println("query: " + query);
-		try {
-			statement.execute(query);
-			update();
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
 	}
 }

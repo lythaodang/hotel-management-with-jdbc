@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,25 +72,18 @@ public class View {
 		cards.add(getReceiptPanel(), "Receipt");
 		cards.add(getCustViewCancelPanel(), "View/Cancel");
 		// cards.add(getCustRoomServicePanel(), "View/Order");
-		// cards.add(getGiveFeedbackPanel(), "Give Feedback");
+		cards.add(getFileComplaintPanel(), "File Complaint");
 
 		// employee panels
 		cards.add(getReservationsPanel(), "Reservations");
 		// cards.add(getRoomServicePanel(), "Room Service");
-		// cards.add(getFeedbackPanel(), "Feedback");
 		// cards.add(getStatisticsPanel(), "Statistics");
 		// cards.add(getArchivePanel(), "Archive");
 		cards.add(getUsersPanel(), "Users");
 		// cards.add(getCheckOutPanel(), "Check out");
 
-		//Kun added
-		cards.add(getGiveFeedbackPanel(), "Give Feedback");
-
-		cards.add(getUserComplaintPanel(), "User Complaint");
-		cards.add(getResolveComplaintPanel(), "Resolve Complaint");
-		
+		cards.add(getComplaintsPanel(), "Complaints");		
 		cards.add(getViewRoomServicePanel(), "View Room Service");
-
 
 		frame.add(cards); // add the panel with card layout to the frame
 
@@ -495,23 +487,22 @@ public class View {
 		if (role.equalsIgnoreCase("manager")) {
 			panel.addNavigationButton("Reservations", 16, "Reservations", 0, 1);
 			panel.addNavigationButton("Room Service", 16, "Room Service", 0, 2);
-			panel.addNavigationButton("User Complaint", 16, "User Complaint", 0, 3); 
-			panel.addNavigationButton("Resolve Complaint", 16, "Resolve Complaint", 0, 4);
-			panel.addNavigationButton("Users", 16, "Users", 0, 5);
-			panel.addNavigationButton("Statistics", 16, "Statistics", 0, 6);
-			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 7);
+			panel.addNavigationButton("Complaints", 16, "Complaints", 0, 3); 
+			panel.addNavigationButton("Users", 16, "Users", 0, 4);
+			panel.addNavigationButton("Statistics", 16, "Statistics", 0, 5);
+			panel.addNavigationButton("Archive Database", 16, "Archive", 0, 6);
 		}
 		else if (role.equalsIgnoreCase("customer")) {
 			panel.addNavigationButton("Book a reservation", 16, "Book", 0, 1);
 			panel.addNavigationButton("View/Cancel Reservations", 16, "View/Cancel", 0, 2);
 			panel.addNavigationButton("View/Order Room Service", 16, "View/Order", 0, 3);
-			panel.addNavigationButton("Give Feedback", 16, "Give Feedback", 0, 4);
+			panel.addNavigationButton("File Complaint", 16, "File Complaint", 0, 4);
 		}
 		else if (role.equalsIgnoreCase("room service")) {
 			panel.addNavigationButton("Tasks", 16, "Room Service", 0, 1);
 		}
 		else {
-			panel.addNavigationButton("Check Out", 16, "Check out", 0, 3);
+			panel.addNavigationButton("Check Out a Customer", 16, "Check out", 0, 3);
 		}
 
 		return panel;
@@ -741,8 +732,14 @@ public class View {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if (model.getCurrentUser() != null) list.setListData(model
-						.getCurrentUser().getReservations().toArray());
+				ArrayList<Reservation> notCanceled = new ArrayList<Reservation>();
+				if (model.getCurrentUser() != null) {
+					for (Reservation r : model.getCurrentUser().getReservations())
+						if (!r.getCanceled())
+							notCanceled.add(r);
+					
+					list.setListData(notCanceled.toArray());
+				}
 				else list.setListData(new Reservation[0]);
 			}
 		});
@@ -785,12 +782,14 @@ public class View {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
+		c.weighty = 1;
 		c.gridwidth = 4;
 		c.weightx = 1;
 		c.ipady = 30;
 		panel.addLabel("Reservations", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
-
+		
 		c.ipady = 0;
+		c.weightx = 0;
 		c.insets = new Insets(10,10,10,10);
 		panel.addLabel("Enter a min and max and sort by room or customer.", 12, "left", 
 				null, null, 0, 1);
@@ -812,11 +811,14 @@ public class View {
 		roomBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 		panel.addComponent(customerBtn, 2, 3);
 
+		c.weightx = 1;
 		c.gridwidth = 4;
 		c.weighty = 1;
 		c.insets = new Insets(10,10,10,10);
 		final JTextArea list = new JTextArea();
 		list.setEditable(false);
+		list.setWrapStyleWord(true);
+        list.setLineWrap(true);
 		JScrollPane scrollPane = new JScrollPane(list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -898,8 +900,8 @@ public class View {
 
 		c.ipady = 0;
 		c.insets = new Insets(10,10,10,10);
-		//panel.addLabel("To view all users do not enter a min #.", 12, "left", null, null, 0, 1);
-		
+		panel.addLabel("To view all users do not enter a min #.", 12, "left", null, null, 0, 1);
+
 		c.gridwidth = 1;
 		panel.addLabel("Min # of Reservations (Only customers)", 12, "left", null, null, 0, 2);
 		final JTextField numRes = new JTextField();
@@ -910,10 +912,12 @@ public class View {
 		JButton searchBtn = new JButton("Search for customers");
 		searchBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
 		panel.addComponent(searchBtn, 0, 3);
-	
+
 		c.weighty = 1;
 		final JTextArea list = new JTextArea();
 		list.setEditable(false);
+		list.setWrapStyleWord(true);
+        list.setLineWrap(true);
 		JScrollPane scrollPane = new JScrollPane(list,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -921,7 +925,7 @@ public class View {
 		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		panel.addComponent(scrollPane, 0, 4);
 		panel.addComponent(list);
-		
+
 		searchBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -990,38 +994,27 @@ public class View {
 		return panel;
 	}
 
-	//Kun added
-	private JPanel getGiveFeedbackPanel() {
+	private JPanel getFileComplaintPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
 		c.weighty = 1;
-		c.insets = new Insets(10,10,10,10);
-		final JLabel profile = new JLabel();
-		model.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent event)
-			{
-				if (model.getCurrentUser() != null) {
-					Account user = model.getCurrentUser();
-					profile.setText("<html>Username: " + user.getUsername() 
-					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-					+ "<br>Role: " + user.getRole());
-				}
-			}
-		});
-		panel.addComponent(profile, 0, 0);
-		c.weighty = 0;
+		c.ipady = 30;
+		panel.addLabel("File a Complaint", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
 
-		panel.addLabel("complaint", 16, "left", null, null, 0, 1);
-		c.weighty = 1;
-		c.gridwidth = 1;
-		final JTextField complaint = new JTextField();
+		c.ipady = 0;
+		c.insets = new Insets(10,10,10,10);
+		panel.addLabel("<html>We apologize for any inconvenience. "
+				+ "<br>Please file your complaint here and a hotel manager "
+				+ "will contact you as soon as possible.<html>", 12, "left", null, null, 0, 1);
+
+		final JTextArea complaint = new JTextArea();
+		complaint.setWrapStyleWord(true);
+        complaint.setLineWrap(true);
 		panel.addComponent(complaint, 0, 2);
 
 		c.weighty = 0;
-		c.gridwidth = 0;
-		panel.addNavigationButton("Back", 16, "Customer", 0, 4);
+		panel.addNavigationButton("Back", 16, "Customer", 0, 3);
 
 		JButton SumbitButton = new JButton("Sumbit");
 		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -1029,98 +1022,139 @@ public class View {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				boolean validEntry = true;
-				String errors = "<html>The following are not valid entries:<br>";
-
 				String complaintTest = complaint.getText();
-				if (complaintTest.isEmpty() || complaintTest.length() < 1)
-				{
-					complaint.setText("");
+				if (complaintTest.isEmpty() || complaintTest.length() < 1 || complaintTest.length() > 100) 
 					validEntry = false;
-					errors += "complaint Test has to greater than 1 character<br>";
-				}
 
 				if (validEntry) {
 					panel.clearComponents();
 					if (model.addComplaint(model.getCurrentUser().getUsername(), complaintTest)) {	
-						JOptionPane.showMessageDialog(new JFrame(), "Successful!", "Result", JOptionPane.DEFAULT_OPTION);
+						JOptionPane.showMessageDialog(new JFrame(), "Your complaint has been filed.", 
+								"Result", JOptionPane.DEFAULT_OPTION);
 						view.switchPanel(model.getCurrentRole());
 					}
+					else
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"An unexpected error has occurred. Please contact your system admin.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
 				}
 				else
-					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(new JFrame(), "Error: Must be between 1 and 100 characters.", 
+							"Error", JOptionPane.ERROR_MESSAGE);
 			};
 		});
-		panel.addComponent(SumbitButton, 0, 3);
+		panel.addComponent(SumbitButton, 0, 4);
 
 		return panel;
 	}
 
-	//Kun added
-	private JPanel getUserComplaintPanel() {
-
+	private JPanel getComplaintsPanel() {
 		final BasicPanel panel = new BasicPanel(this);
 		GridBagConstraints c = panel.getConstraints();
 
-		c.weighty = 1;
+		c.ipady = 30;
+		c.gridwidth = 2;
+		panel.addLabel("Customer Complaints", 24, "center", Color.white, new Color(0, 0, 128), 0, 0);
+
+		c.weightx = 0;
+		c.ipady = 0;
+		c.gridwidth = 1;
 		c.insets = new Insets(10,10,10,10);
-		final JLabel profile = new JLabel();
-		model.addChangeListener(new ChangeListener() {
+		panel.addLabel("Enter a complaint ID and solution to resolve the complaint.", 12, "left", null, null, 1, 1);
+
+		panel.addLabel("Complaint ID: ", 12, "left", null, null, 1, 2);
+		panel.addLabel("Solution (Between 1 and 100 chars):", 12, "left", null, null, 1, 4);
+
+		final JTextField idTF = new JTextField();
+		panel.addComponent(idTF, 1, 3);
+
+		final JTextArea solTA = new JTextArea();
+		solTA.setWrapStyleWord(true);
+        solTA.setLineWrap(true);
+		panel.addComponent(solTA, 1, 5);
+
+		JButton submitBtn = new JButton("Resolve Complaint");
+		submitBtn.setFont(new Font("Tahoma", Font.BOLD, 14));
+		panel.addComponent(submitBtn, 1, 6);
+
+		c.gridx = 1;
+		JButton backBtn = new JButton("Back to main menu");
+		backBtn.setFont(new Font("Tahoma", Font.BOLD, 12));
+		backBtn.addActionListener(new ActionListener() {
 			@Override
-			public void stateChanged(ChangeEvent event)
-			{
-				if (model.getCurrentUser() != null) {
-					Account user = model.getCurrentUser();
-					profile.setText("<html>Username: " + user.getUsername() 
-					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-					+ "<br>Role: " + user.getRole());
-				}
+			public void actionPerformed(ActionEvent e) {
+				view.switchPanel(model.getCurrentRole());
 			}
 		});
-		panel.addComponent(profile, 0, 0);
-		c.weighty = 0;
+		panel.addComponent(backBtn, 0, 6);
+		
+		c.gridheight = 5;
+		final JTextArea list = new JTextArea();
+		list.setWrapStyleWord(true);
+        list.setLineWrap(true);
+		list.setEditable(false);
+		panel.addComponent(list);
+		JScrollPane listScroller = new JScrollPane(list);
+		panel.addComponent(listScroller, 0, 1);
 
-		panel.addLabel("Feedback List:", 16, "left", null, null, 0, 1);
-		c.weighty = 1;
-		c.gridwidth = 1;
+		model.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				String output = "";
+				ArrayList<Complaint> complaints = model.getComplaints();
+				if (complaints != null){
+					output += "Number of complaints: " + complaints.size();
+					for (Complaint c : complaints)
+						output += "\n\n" + c.toString();
+					list.setText(output);
+				}
+				else {
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"An unexpected error has occurred. Please contact your system admin.", "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+			};
+		});
 
-		final JTextArea Feedback = new JTextArea();
-		String FeedbackOutput = "";
+		submitBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				Integer id = null;
+				String solution = solTA.getText();
 
-		model.getFeedback();
-		if (!model.getComplaints().isEmpty()) {
-			for (int i=0; i < model.getComplaints().size(); i++) {
-
-				FeedbackOutput += "user: " + model.getComplaints().get(i).getCustomer() + "\n"
-						+ "complaint: : " + model.getComplaints().get(i).getComplaint() + "\n"
-						+ "time: " + model.getComplaints().get(i).getTime() + "\n";
 				try {
-					FeedbackOutput += "resolvedBy: " + model.getComplaints().get(i).getResolvedBy() + "\n";
-				}
-				catch (NullPointerException e) {
-					FeedbackOutput += "resolvedBy: " + "null" + "\n";
-				}
+					if (!idTF.getText().equals(""))
+						id = Integer.parseInt(idTF.getText());
 
-				try {
-					FeedbackOutput += "Solution: " + model.getComplaints().get(i).getSolution() + "\n";
+					Complaint c = model.getComplaint(id);
+					if (c == null)
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"Error: Complaint does not exist.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+					else if (solution.length() < 1 || solution.length() > 100)
+						JOptionPane.showMessageDialog(new JFrame(), 
+								"Error: Solution must be between 1 and 100 characters.", "Error", 
+								JOptionPane.ERROR_MESSAGE);
+					else {
+						if (c.getResolvedBy() == null) {
+							panel.clearComponents();
+							model.updateComplaint(id, model.getCurrentUser().getUsername(), solution);
+							JOptionPane.showMessageDialog(new JFrame(), "Complaint resolved", "Result", JOptionPane.DEFAULT_OPTION);
+						}
+						else {
+							JOptionPane.showMessageDialog(new JFrame(), 
+									"Error: The complaint has already been resolved.", "Error", 
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
 				}
-				catch (NullPointerException e) {
-					FeedbackOutput += "Solution: " + "null" + "\n";
+				catch (Exception e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(new JFrame(), 
+							"Error: Invalid input(s).", "Error", 
+							JOptionPane.ERROR_MESSAGE);
 				}
-				FeedbackOutput += "\n";
-
-			}
-			Feedback.append(FeedbackOutput);
-		}
-		else {
-			Feedback.append("Complaint List is empty \n");
-		}
-
-		JScrollPane ScrollBar = new JScrollPane(Feedback,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		panel.addComponent(ScrollBar, 0, 3);
-
-		c.weighty = 0;
-		c.gridwidth = 0;
-		panel.addNavigationButton("Back", 16, "Manager", 0, 5);
+			};
+		});
 
 		return panel;
 	}
@@ -1169,7 +1203,7 @@ public class View {
 		}
 		return result;
 	}
-	
+
 	private String formatUsers(ArrayList<Account> users) {
 		String result = "Total users: " + users.size();
 		if (!users.isEmpty()) {
@@ -1186,143 +1220,5 @@ public class View {
 			}
 		}
 		return result;
-	}
-	
-	//Kun added
-	private JPanel getResolveComplaintPanel() {
-
-		final BasicPanel panel = new BasicPanel(this);
-		GridBagConstraints c = panel.getConstraints();
-
-		c.weighty = 1;
-		c.insets = new Insets(10,10,10,10);
-		final JLabel profile = new JLabel();
-		model.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent event)
-			{
-				if (model.getCurrentUser() != null) {
-					Account user = model.getCurrentUser();
-					profile.setText("<html>Username: " + user.getUsername() 
-					+ "<br>Name: " + user.getFirstName() + " " + user.getLastName()
-					+ "<br>Role: " + user.getRole());
-				}
-			}
-		});
-		panel.addComponent(profile, 0, 0);
-		c.weighty = 1;
-
-		panel.addLabel("Feedback List:", 16, "left", null, null, 1, 0);
-		
-		
-		//c.weightx = 1;
-		//c.weighty = 1;
-		c.gridheight = 5;
-		final JTextArea Feedback = new JTextArea();
-		String FeedbackOutput = "";
-
-		model.getFeedback();
-		if (!model.getComplaints().isEmpty()) {
-			for (int i=0; i < model.getComplaints().size(); i++) {
-
-				FeedbackOutput += "user: " + model.getComplaints().get(i).getCustomer() + "\n"
-						+ "complaint: : " + model.getComplaints().get(i).getComplaint() + "\n"
-						+ "time: " + model.getComplaints().get(i).getTime() + "\n";
-				try {
-					FeedbackOutput += "resolvedBy: " + model.getComplaints().get(i).getResolvedBy() + "\n";
-				}
-				catch (NullPointerException e) {
-					FeedbackOutput += "resolvedBy: " + "null" + "\n";
-				}
-
-				try {
-					FeedbackOutput += "Solution: " + model.getComplaints().get(i).getSolution() + "\n";
-				}
-				catch (NullPointerException e) {
-					FeedbackOutput += "Solution: " + "null" + "\n";
-				}
-				FeedbackOutput += "\n";
-
-			}
-			Feedback.append(FeedbackOutput);
-		}
-		else {
-			Feedback.append("Complaint List is empty \n");
-		}
-
-		JScrollPane ScrollBar = new JScrollPane(Feedback,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		panel.addComponent(ScrollBar, 1, 1);
-
-		//c.weightx = 1;
-		//c.weighty = 1;
-		c.gridheight = 1;
-		panel.addLabel("user name:", 16, "left", null, null, 0, 1);
-		final JTextArea customerName = new JTextArea();
-		panel.addComponent(customerName, 0, 2);
-
-		panel.addLabel("user complaint:", 16, "left", null, null, 0, 3);
-		final JTextArea complaint = new JTextArea();
-		panel.addComponent(complaint, 0, 4);
-		
-		panel.addLabel("Solution:", 16, "left", null, null, 0, 5);
-		
-		//c.weightx = 1;
-		c.weighty = 2;
-		//c.gridheight = 1;
-		final JTextArea Solution = new JTextArea();
-		panel.addComponent(Solution, 0, 6);
-		
-		//c.weightx = 1;
-		c.weighty = 1;
-		c.gridheight = 2;
-		JButton SumbitButton = new JButton("Sumbit");
-		SumbitButton.setFont(new Font("Tahoma", Font.BOLD, 16));
-		SumbitButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				
-				boolean validEntry = true;
-				String errors = "<html>The following are not valid entries:<br>";
-				
-				String CustomerNameTest = customerName.getText();
-				String SolutionTest = Solution.getText();
-				String ComplaintTest = complaint.getText();
-				
-				if (!model.checkUserExistence(CustomerNameTest)) {
-					customerName.setText("");
-					validEntry = false;
-					errors += "There is not such a customer<br>";
-				}
-				
-				if (SolutionTest.isEmpty() || SolutionTest.length() < 1)
-				{
-					Solution.setText("");
-					validEntry = false;
-					errors += "Solution Test has to greater than 1 character<br>";
-				}
-
-				if (ComplaintTest.isEmpty() || ComplaintTest.length() < 1)
-				{
-					complaint.setText("");
-					validEntry = false;
-					errors += "Complaint Test has to greater than 1 character<br>";
-				}
-				
-				if (validEntry) {
-					panel.clearComponents();
-					if (model.updateComplaint(CustomerNameTest, ComplaintTest, model.getCurrentUser().getUsername(), SolutionTest)) {	
-						JOptionPane.showMessageDialog(new JFrame(), "Complaint solved!", "Result", JOptionPane.DEFAULT_OPTION);
-						view.switchPanel(model.getCurrentRole());
-					}
-				}
-				else
-					JOptionPane.showMessageDialog(new JFrame(), errors + "</html>", "Error", JOptionPane.ERROR_MESSAGE);
-					
-			};
-		});
-		panel.addComponent(SumbitButton, 0, 7);
-		panel.addNavigationButton("Back", 16, "Manager", 1, 7);
-
-		return panel;
 	}
 }

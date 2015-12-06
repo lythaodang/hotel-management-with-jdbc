@@ -1,3 +1,4 @@
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -12,16 +13,16 @@ import java.util.Date;
  * A user's Complaint.
  */
 public class Complaint {
-
+	private final int id;
 	private final String customer;
 	private final String complaint;
 	private final Date time;
 	private final String resolvedBy;
 	private final String solution;
 
-	public Complaint(String customer, String complaint, Date time, 
+	public Complaint(int id, String customer, String complaint, Date time, 
 					String resolvedBy, String solution) {
-
+		this.id = id;
 		this.customer = customer;
 		this.complaint = complaint;
 		this.time = time;
@@ -29,6 +30,10 @@ public class Complaint {
 		this.solution = solution;
 	}
 
+	public int getId() {
+		return id;
+	}
+	
 	public String getCustomer() {
 		return customer;
 	}
@@ -47,5 +52,13 @@ public class Complaint {
 	
 	public String getSolution() {
 		return solution;
+	}
+	
+	public String toString() {
+		String s = "Username: " + customer +"\nComplaint ID: " + id + "\nFiled on: " + 
+	new SimpleDateFormat("MM/dd/yyyy").format(time) + "\nComplaint: " + complaint;
+		if (resolvedBy != null)
+			s += "\nResolved By: " + resolvedBy + "\nSolution: " + solution;
+		return s;
 	}
 }
