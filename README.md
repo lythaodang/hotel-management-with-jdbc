@@ -7,3 +7,4 @@ Java GUI project with JDBC. Simulates the daily operations in a hotel such as ro
 3. Run createDatabase.sql
 4. Then run the various triggers & stored procedures
 5. Then createCustomers.sql, createRooms.sql, createReservations.sql for initial data
+6. To run the application, simply import it as an Eclipse project.
